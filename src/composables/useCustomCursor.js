@@ -25,6 +25,8 @@ export function useCustomCursor(config, containerRef) {
   let trailParticles = []
   let trailFrame = 0
   const TRAIL_MAX = 15
+  let prevMouseX = 0
+  let prevMouseY = 0
 
   const LERP_DOT = 0.15
   const LERP_RING = 0.08
@@ -85,10 +87,21 @@ export function useCustomCursor(config, containerRef) {
       cursorRing.style.transform = `translate(${ringX}px, ${ringY}px)`
     }
 
-    // Rose trail: spawn particle every 3rd frame
+    // Rose trail: velocity-aware spawning
     if (config.variant === 'rose') {
+      const dx = mouseX - prevMouseX
+      const dy = mouseY - prevMouseY
+      const velocity = Math.sqrt(dx * dx + dy * dy)
+      prevMouseX = mouseX
+      prevMouseY = mouseY
+
       trailFrame++
-      if (trailFrame % 3 === 0) {
+      // Fast movement → spawn every frame, slow → every 5th, idle → skip
+      if (velocity > 12 && trailFrame % 1 === 0) {
+        spawnTrailParticle()
+      } else if (velocity > 4 && trailFrame % 3 === 0) {
+        spawnTrailParticle()
+      } else if (velocity > 1 && trailFrame % 5 === 0) {
         spawnTrailParticle()
       }
     }

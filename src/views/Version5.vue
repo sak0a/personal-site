@@ -86,7 +86,7 @@ onUnmounted(() => {
 
     <!-- Projects -->
     <section class="reveal-slow pb-6">
-      <h2 class="text-2xl font-bold mb-10">
+      <h2 class="text-2xl font-bold mb-10 v5-heading-line" :style="{ '--accent': accent }">
         projects
       </h2>
     </section>

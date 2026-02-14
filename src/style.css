@@ -310,14 +310,81 @@ body {
   transform: scaleX(1);
 }
 
-/* V5: Staggered char color on title hover */
+/* V5: "projects" heading — accent line draws from left */
+.v5-heading-line {
+  position: relative;
+  display: inline-block;
+}
+.v5-heading-line::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 2rem;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 1px;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.6s ease;
+}
+.v5-heading-line.visible::after {
+  transform: scaleX(1);
+}
+
+/* V5: Staggered char color on title hover + letter-spacing expand */
 .v5-title-stagger span {
   display: inline-block;
-  transition: color 0.15s ease;
+  transition: color 0.15s ease, letter-spacing 0.3s ease;
   color: inherit;
 }
 .v5-title-stagger:hover span {
   color: var(--accent);
+}
+.v5-title-stagger {
+  transition: letter-spacing 0.3s ease;
+  letter-spacing: -0.01em;
+}
+.v5-title-stagger:hover {
+  letter-spacing: 0.03em;
+}
+
+/* V5: Language tag hover lift + glow */
+.v5-tag {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.v5-tag:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px var(--tag-color);
+}
+
+/* V5: Cascading expand reveal */
+.v5-expand-image {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.v5-expand-image.show {
+  opacity: 0.9;
+  transform: translateY(0);
+}
+.v5-expand-links {
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.3s ease 0.1s, transform 0.3s ease 0.1s;
+}
+.v5-expand-links.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+.v5-expand-tags {
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.3s ease 0.2s, transform 0.3s ease 0.2s;
+}
+.v5-expand-tags.show {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* V5: Year label slide on group hover */

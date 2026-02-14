@@ -265,12 +265,20 @@ function getDomain(url) {
     <!-- Expandable details -->
     <div class="grid transition-[grid-template-rows] duration-300 ease-out" :style="{ gridTemplateRows: expanded ? '1fr' : '0fr' }">
       <div class="overflow-hidden">
-        <div class="pt-4 transition-opacity duration-200" :class="expanded ? 'opacity-100 delay-150' : 'opacity-0'">
-          <!-- Image revealed on expand -->
-          <img :src="project.image" :alt="project.name" class="w-full max-w-md h-48 object-cover rounded-lg mb-4 opacity-90" />
+        <div class="pt-4">
+          <!-- Image — cascade step 1 -->
+          <img
+            :src="project.image"
+            :alt="project.name"
+            class="w-full max-w-md h-48 object-cover rounded-lg mb-4"
+            :class="staggerTitle ? ['v5-expand-image', { show: expanded }] : [expanded ? 'opacity-90' : 'opacity-0', 'transition-opacity duration-200']"
+          />
 
-          <!-- Links -->
-          <div class="flex items-center gap-4 mb-3">
+          <!-- Links — cascade step 2 -->
+          <div
+            class="flex items-center gap-4 mb-3"
+            :class="staggerTitle ? ['v5-expand-links', { show: expanded }] : [expanded ? 'opacity-100' : 'opacity-0', 'transition-opacity duration-200']"
+          >
             <a v-if="project.url" :href="project.url" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-sm text-zinc-500 transition-colors" @click.stop @mouseenter="$event.currentTarget.style.color = accentColor" @mouseleave="$event.currentTarget.style.color = ''">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" :d="iconPaths.external" /></svg>
               {{ getDomain(project.url) }}
@@ -281,9 +289,18 @@ function getDomain(url) {
             </a>
           </div>
 
-          <!-- Languages -->
-          <div class="flex flex-wrap gap-1.5">
-            <span v-for="lang in project.languages" :key="lang" class="text-xs px-2.5 py-0.5 rounded-full" :style="{ backgroundColor: accentColor + '15', color: accentColor }">{{ lang }}</span>
+          <!-- Languages — cascade step 3, with tag hover -->
+          <div
+            class="flex flex-wrap gap-1.5"
+            :class="staggerTitle ? ['v5-expand-tags', { show: expanded }] : [expanded ? 'opacity-100' : 'opacity-0', 'transition-opacity duration-200']"
+          >
+            <span
+              v-for="lang in project.languages"
+              :key="lang"
+              class="text-xs px-2.5 py-0.5 rounded-full"
+              :class="staggerTitle ? 'v5-tag' : ''"
+              :style="{ backgroundColor: accentColor + '15', color: accentColor, '--tag-color': accentColor + '30' }"
+            >{{ lang }}</span>
           </div>
         </div>
       </div>
