@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useScrollReveal } from '../composables/useScrollReveal'
+import { useCardTilt } from '../composables/useCardTilt'
 import HeroSection from '../components/shared/HeroSection.vue'
 import ProjectCard from '../components/shared/ProjectCard.vue'
 import LinkItem from '../components/shared/LinkItem.vue'
@@ -12,6 +13,7 @@ const accent = '#a78bfa'
 const container = ref(null)
 const expandedId = ref(null)
 useScrollReveal(container)
+const { onTiltMove, onTiltLeave } = useCardTilt(4)
 
 function toggleProject(id) {
   expandedId.value = expandedId.value === id ? null : id
@@ -41,8 +43,11 @@ function toggleProject(id) {
       <div
         v-for="(project, i) in projects"
         :key="project.id"
-        class="reveal-scale"
-        :style="{ transitionDelay: `${i * 100}ms` }"
+        class="reveal-scale-tilt"
+        :class="{ 'card-glow-border': expandedId !== project.id }"
+        :style="{ transitionDelay: `${i * 100}ms`, borderRadius: '1rem' }"
+        @mousemove="expandedId !== project.id && onTiltMove($event, $event.currentTarget)"
+        @mouseleave="onTiltLeave($event.currentTarget)"
       >
         <ProjectCard
           :project="project"

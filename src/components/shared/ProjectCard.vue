@@ -36,6 +36,11 @@ function getDomain(url) {
 <template>
   <!-- Timeline variant (Version 1) -->
   <div v-if="variant === 'timeline'" class="relative pl-8 pb-12 group cursor-pointer" @click="emit('toggle')">
+    <!-- Ping ring -->
+    <div
+      class="absolute left-0 top-2 w-3 h-3 rounded-full opacity-40 animate-ping"
+      :style="{ backgroundColor: accentColor }"
+    />
     <div
       class="absolute left-0 top-2 w-3 h-3 rounded-full border-2 transition-all duration-300"
       :style="{ borderColor: accentColor, backgroundColor: expanded ? accentColor : 'transparent' }"
@@ -110,7 +115,7 @@ function getDomain(url) {
     <h3 class="text-lg font-bold mt-1 mb-2" :style="{ color: accentColor }">{{ project.name }}</h3>
     <p class="text-sm text-zinc-400 leading-relaxed mb-3">{{ project.description }}</p>
     <div class="flex flex-wrap gap-1.5">
-      <span v-for="tag in project.tags" :key="tag" class="text-xs px-2 py-0.5 rounded-full" :style="{ backgroundColor: accentColor + '15', color: accentColor }">{{ tag }}</span>
+      <span v-for="tag in project.tags" :key="tag" class="text-xs px-2 py-0.5 rounded-full transition-transform duration-200 group-hover:-translate-y-0.5" :style="{ backgroundColor: accentColor + '15', color: accentColor }">{{ tag }}</span>
     </div>
 
     <!-- Expandable details -->
@@ -140,7 +145,8 @@ function getDomain(url) {
     <img
       :src="project.image"
       :alt="project.name"
-      class="w-full max-w-md mx-auto h-48 object-cover rounded-xl mb-4 opacity-80 group-hover:opacity-100 transition-opacity"
+      class="w-full max-w-md mx-auto h-48 object-cover rounded-xl mb-4 opacity-80 group-hover:opacity-100 transition-all duration-300 image-glow-hover"
+      :style="{ '--glow-color': accentColor + '40' }"
     />
     <span class="text-xs text-zinc-600 font-mono">{{ project.year }}</span>
     <h3 class="text-2xl font-bold mt-1 mb-2">{{ project.name }}</h3>

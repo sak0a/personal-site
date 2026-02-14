@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useScrollReveal } from '../composables/useScrollReveal'
 import HeroSection from '../components/shared/HeroSection.vue'
 import ProjectCard from '../components/shared/ProjectCard.vue'
@@ -11,11 +11,19 @@ import { links } from '../data/links'
 const accent = '#22d3ee'
 const container = ref(null)
 const expandedId = ref(null)
+const heroReady = ref(false)
 useScrollReveal(container)
 
 function toggleProject(id) {
   expandedId.value = expandedId.value === id ? null : id
 }
+
+// Trigger hero char stagger after mount
+onMounted(() => {
+  setTimeout(() => { heroReady.value = true }, 100)
+})
+
+const heroChars = ['s', 'a', 'k', 'a']
 </script>
 
 <template>
@@ -27,13 +35,23 @@ function toggleProject(id) {
       font-class="font-mono"
     >
       <template #title>
-        <span class="drop-shadow-[0_0_20px_rgba(34,211,238,0.2)]">saka</span><span class="text-accent-cyan">.</span>
+        <span class="char-reveal" :class="{ visible: heroReady }">
+          <span
+            v-for="(char, i) in heroChars"
+            :key="i"
+            class="drop-shadow-[0_0_20px_rgba(34,211,238,0.2)]"
+            :style="{ transitionDelay: `${i * 60}ms` }"
+          >{{ char }}</span><span class="text-accent-cyan" :style="{ transitionDelay: `${heroChars.length * 60}ms` }">.</span>
+        </span>
+      </template>
+      <template #subtitle>
+        creating all types of projects for things i'm interested in — specially web projects.<span class="cursor-blink text-accent-cyan ml-0.5">|</span>
       </template>
     </HeroSection>
 
     <!-- Projects timeline -->
     <section class="reveal-left pb-10">
-      <h2 class="text-2xl font-bold font-mono mb-8 text-accent-cyan">
+      <h2 class="text-2xl font-bold font-mono mb-8 text-accent-cyan glitch-hover cursor-default">
         projects
       </h2>
     </section>
@@ -57,7 +75,7 @@ function toggleProject(id) {
 
     <!-- Links -->
     <section class="reveal py-16">
-      <h2 class="text-2xl font-bold font-mono mb-6 text-accent-cyan">
+      <h2 class="text-2xl font-bold font-mono mb-6 text-accent-cyan glitch-hover cursor-default">
         links
       </h2>
       <div class="flex flex-wrap gap-3">

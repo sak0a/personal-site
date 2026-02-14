@@ -86,3 +86,170 @@ body {
   background: #34d399;
   border-radius: 3px;
 }
+
+/* ===== MICRO-INTERACTIONS ===== */
+
+/* V1: Blinking terminal cursor */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.cursor-blink {
+  animation: blink 1.06s step-end infinite;
+}
+
+/* V1: Glitch hover on section headers */
+@keyframes glitch {
+  0% { text-shadow: 2px 0 #22d3ee, -2px 0 #fb7185; transform: translateX(0); }
+  20% { text-shadow: -2px 0 #22d3ee, 2px 0 #fb7185; transform: translateX(-1px); }
+  40% { text-shadow: 2px 0 #fb7185, -2px 0 #22d3ee; transform: translateX(1px); }
+  60% { text-shadow: -1px 0 #22d3ee, 1px 0 #fb7185; transform: translateX(-1px); }
+  80% { text-shadow: 1px 0 #fb7185, -1px 0 #22d3ee; transform: translateX(0); }
+  100% { text-shadow: none; transform: translateX(0); }
+}
+.glitch-hover {
+  position: relative;
+}
+.glitch-hover:hover {
+  animation: glitch 0.3s ease-in-out;
+}
+
+/* V1: Staggered character reveal */
+.char-reveal span {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.char-reveal.visible span {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* V2: Breathing ambient blob */
+@keyframes breathe {
+  0%, 100% { transform: translate(-50%, 0) scale(1); }
+  50% { transform: translate(-50%, -10px) scale(1.1); }
+}
+.blob-breathe {
+  animation: breathe 8s ease-in-out infinite;
+}
+
+/* V2: Underline grow on scroll */
+.underline-grow {
+  width: 3rem;
+  transition: width 0.8s ease;
+}
+.underline-grow.visible {
+  width: 6rem;
+}
+
+/* V2: Separator draw from center */
+.separator-draw {
+  width: 0;
+  transition: width 0.6s ease;
+}
+.separator-draw.visible {
+  width: 4rem;
+}
+
+/* V2: Image glow pulse on hover */
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 0 transparent; }
+  50% { box-shadow: 0 0 20px var(--glow-color), 0 0 40px var(--glow-color); }
+}
+.image-glow-hover:hover {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+/* V3: Animated conic gradient border on hover */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.card-glow-border {
+  position: relative;
+  z-index: 0;
+}
+.card-glow-border::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: conic-gradient(from 0deg, #a78bfa, #22d3ee, #fb7185, #f59e0b, #a78bfa);
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  animation: spin 3s linear infinite;
+}
+.card-glow-border:hover::before {
+  opacity: 1;
+}
+.card-glow-border.expanded::before {
+  opacity: 0;
+}
+
+/* V3: Staggered scale entrance with tilt */
+.reveal-scale-tilt {
+  opacity: 0;
+  transform: scale(0.92) rotate(-1.5deg);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal-scale-tilt:nth-child(even) {
+  transform: scale(0.92) rotate(1.5deg);
+}
+.reveal-scale-tilt.visible {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}
+
+/* V4: Link bar slide-fill on hover */
+.link-bar-fill {
+  position: relative;
+  overflow: hidden;
+}
+.link-bar-fill::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  opacity: 0.08;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+.link-bar-fill:hover::before {
+  transform: scaleX(1);
+}
+
+/* V5: Divider draw on scroll */
+.divider-draw {
+  transform: scaleX(0);
+  transition: transform 0.6s ease;
+}
+.divider-draw.visible {
+  transform: scaleX(1);
+}
+
+/* VersionChooser: Tile color bleed glow */
+.tile-glow {
+  position: relative;
+  overflow: hidden;
+}
+.tile-glow::after {
+  content: '';
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  width: 80%;
+  height: 40px;
+  transform: translateX(-50%) scale(0);
+  border-radius: 50%;
+  background: var(--tile-color);
+  opacity: 0.15;
+  filter: blur(20px);
+  transition: transform 0.4s ease, opacity 0.4s ease;
+}
+.tile-glow:hover::after {
+  transform: translateX(-50%) scale(1);
+  opacity: 0.25;
+}

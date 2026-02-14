@@ -20,8 +20,8 @@ function toggleProject(id) {
 
 <template>
   <div ref="container" class="relative">
-    <!-- Ambient glow blob -->
-    <div class="absolute top-20 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full blur-[120px] pointer-events-none" :style="{ backgroundColor: accent + '0d' }" />
+    <!-- Ambient glow blob with breathing animation -->
+    <div class="absolute top-20 left-1/2 w-[500px] h-[500px] rounded-full blur-[120px] pointer-events-none blob-breathe" :style="{ backgroundColor: accent + '0d' }" />
 
     <div class="relative max-w-3xl mx-auto px-6">
       <HeroSection
@@ -32,8 +32,8 @@ function toggleProject(id) {
         <template #title>
           saka<span class="text-accent-amber">.</span>
         </template>
-        <!-- Decorative underline -->
-        <div class="reveal mt-6 mx-auto w-24 h-1 rounded-full bg-gradient-to-r from-transparent via-accent-amber to-transparent" />
+        <!-- Decorative underline that grows on scroll -->
+        <div class="reveal underline-grow mt-6 mx-auto h-1 rounded-full bg-gradient-to-r from-transparent via-accent-amber to-transparent" />
       </HeroSection>
 
       <!-- Projects -->
@@ -57,7 +57,8 @@ function toggleProject(id) {
             :expanded="expandedId === project.id"
             @toggle="toggleProject(project.id)"
           />
-          <div v-if="i < projects.length - 1" class="mt-12 mx-auto w-16 h-px" :style="{ backgroundColor: accent + '4d' }" />
+          <!-- Separator that draws from center on scroll -->
+          <div v-if="i < projects.length - 1" class="reveal separator-draw mt-12 mx-auto h-px" :style="{ backgroundColor: accent + '4d' }" />
         </div>
       </div>
 
