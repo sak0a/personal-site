@@ -14,7 +14,7 @@ const year = new Date().getFullYear()
 </script>
 
 <template>
-  <footer class="py-12 px-6 border-t border-zinc-900">
+  <footer class="py-12 px-6 border-t" :class="variant === 'rose' ? 'border-transparent' : 'border-zinc-900'">
     <!-- V1 Neon: terminal shell prompt -->
     <div v-if="variant === 'neon'" class="font-mono text-sm text-zinc-600">
       <span class="text-zinc-500">$ </span>
@@ -54,6 +54,7 @@ const year = new Date().getFullYear()
         class="w-full h-px mb-8 origin-left"
         :style="{ background: `linear-gradient(to right, ${accentColor}, transparent)` }"
       />
+      <slot name="links" />
       <div class="flex items-end justify-between">
         <div class="group/mark">
           <p class="text-3xl font-black tracking-tight leading-none">

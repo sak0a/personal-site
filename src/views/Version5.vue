@@ -57,6 +57,7 @@ onUnmounted(() => {
 </script>
 
 <template>
+  <div>
   <div ref="container" class="max-w-2xl mx-auto px-6">
     <!-- Hero with char-reveal + magnetic title -->
     <section class="pt-32 pb-24">
@@ -114,30 +115,34 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <!-- Links with slash morph separators -->
-    <section class="reveal-slow py-20">
-      <div class="flex flex-wrap items-center gap-x-1 gap-y-2">
-        <template v-for="(link, i) in links" :key="link.name">
-          <a
-            :href="link.url"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="v5-link"
-          >
-            <span class="v5-link-text text-zinc-500">{{ link.name }}</span>
-            <span class="v5-link-line" />
-          </a>
-          <span
-            v-if="i < links.length - 1"
-            class="slash-morph text-accent-rose/40 mx-1 cursor-default"
-          >
-            <span class="slash-morph-from">/</span>
-            <span class="slash-morph-to absolute inset-0 flex items-center justify-center">~</span>
-          </span>
-        </template>
-      </div>
-    </section>
+  </div>
 
-    <FooterSection :accent-color="accent" variant="rose" />
+    <!-- Wider footer area -->
+    <div class="max-w-3xl mx-auto px-6">
+      <FooterSection :accent-color="accent" variant="rose">
+        <template #links>
+          <div class="flex flex-wrap items-center gap-x-1 gap-y-2 mb-8">
+            <template v-for="(link, i) in links" :key="link.name">
+              <a
+                :href="link.url"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="v5-link"
+              >
+                <span class="v5-link-text text-zinc-500">{{ link.name }}</span>
+                <span class="v5-link-line" />
+              </a>
+              <span
+                v-if="i < links.length - 1"
+                class="slash-morph text-accent-rose/40 mx-1 cursor-default"
+              >
+                <span class="slash-morph-from">/</span>
+                <span class="slash-morph-to absolute inset-0 flex items-center justify-center">~</span>
+              </span>
+            </template>
+          </div>
+        </template>
+      </FooterSection>
+    </div>
   </div>
 </template>
