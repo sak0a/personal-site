@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { useScrollReveal } from '../composables/useScrollReveal'
 import { useCardTilt } from '../composables/useCardTilt'
+import { useCustomCursor } from '../composables/useCustomCursor'
 import HeroSection from '../components/shared/HeroSection.vue'
 import ProjectCard from '../components/shared/ProjectCard.vue'
 import LinkItem from '../components/shared/LinkItem.vue'
@@ -13,6 +14,7 @@ const accent = '#a78bfa'
 const container = ref(null)
 const expandedId = ref(null)
 useScrollReveal(container)
+useCustomCursor({ variant: 'cards', color: accent }, container)
 const { onTiltMove, onTiltLeave } = useCardTilt(4)
 
 function toggleProject(id) {
@@ -39,13 +41,13 @@ function toggleProject(id) {
       </h2>
     </section>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pb-16">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pb-16" style="perspective: 800px">
       <div
         v-for="(project, i) in projects"
         :key="project.id"
         class="reveal-scale-tilt"
         :class="{ 'card-glow-border': expandedId !== project.id }"
-        :style="{ transitionDelay: `${i * 100}ms`, borderRadius: '1rem' }"
+        :style="{ transitionDelay: `${i * 100}ms`, borderRadius: '1rem', transformStyle: 'preserve-3d' }"
         @mousemove="expandedId !== project.id && onTiltMove($event, $event.currentTarget)"
         @mouseleave="onTiltLeave($event.currentTarget)"
       >

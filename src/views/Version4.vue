@@ -2,6 +2,7 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useScrollReveal } from '../composables/useScrollReveal'
 import { useTypewriter } from '../composables/useTypewriter'
+import { useCustomCursor } from '../composables/useCustomCursor'
 import HeroSection from '../components/shared/HeroSection.vue'
 import ProjectCard from '../components/shared/ProjectCard.vue'
 import LinkItem from '../components/shared/LinkItem.vue'
@@ -15,6 +16,7 @@ const expandedId = ref(null)
 const scrollContainer = ref(null)
 const scrollVelocity = ref(0)
 useScrollReveal(container)
+useCustomCursor({ variant: 'terminal', color: accent }, container)
 
 // Typewriter for section headers
 const { displayText: projectsText, start: startProjectsType } = useTypewriter('projects', 60)

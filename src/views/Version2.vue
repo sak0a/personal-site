@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useScrollReveal } from '../composables/useScrollReveal'
+import { useCustomCursor } from '../composables/useCustomCursor'
 import HeroSection from '../components/shared/HeroSection.vue'
 import ProjectCard from '../components/shared/ProjectCard.vue'
 import LinkItem from '../components/shared/LinkItem.vue'
@@ -12,6 +13,7 @@ const accent = '#f59e0b'
 const container = ref(null)
 const expandedId = ref(null)
 useScrollReveal(container)
+useCustomCursor({ variant: 'warm', color: accent }, container)
 
 function toggleProject(id) {
   expandedId.value = expandedId.value === id ? null : id

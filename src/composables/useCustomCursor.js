@@ -1,0 +1,136 @@
+import { onMounted, onUnmounted } from 'vue'
+
+/**
+ * Custom cursor composable with smooth lerp following.
+ *
+ * @param {Object} config
+ * @param {string} config.variant - 'neon' | 'warm' | 'cards' | 'terminal' | 'minimal'
+ * @param {string} config.color - accent color hex
+ * @param {import('vue').Ref<HTMLElement>} containerRef - ref to scope cursor to
+ */
+export function useCustomCursor(config, containerRef) {
+  let cursorDot = null
+  let cursorRing = null
+  let animationId = null
+  let mouseX = 0
+  let mouseY = 0
+  let dotX = 0
+  let dotY = 0
+  let ringX = 0
+  let ringY = 0
+  let isTouchDevice = false
+  let interactiveElements = []
+
+  const LERP_DOT = 0.15
+  const LERP_RING = 0.08
+
+  function lerp(start, end, factor) {
+    return start + (end - start) * factor
+  }
+
+  function onMouseMove(e) {
+    mouseX = e.clientX
+    mouseY = e.clientY
+  }
+
+  function onMouseEnterInteractive() {
+    if (cursorRing) cursorRing.classList.add('cursor-hover')
+    if (cursorDot) cursorDot.classList.add('cursor-hover')
+  }
+
+  function onMouseLeaveInteractive() {
+    if (cursorRing) cursorRing.classList.remove('cursor-hover')
+    if (cursorDot) cursorDot.classList.remove('cursor-hover')
+  }
+
+  function animate() {
+    dotX = lerp(dotX, mouseX, LERP_DOT)
+    dotY = lerp(dotY, mouseY, LERP_DOT)
+    ringX = lerp(ringX, mouseX, LERP_RING)
+    ringY = lerp(ringY, mouseY, LERP_RING)
+
+    if (cursorDot) {
+      cursorDot.style.transform = `translate(${dotX}px, ${dotY}px)`
+    }
+    if (cursorRing) {
+      cursorRing.style.transform = `translate(${ringX}px, ${ringY}px)`
+    }
+
+    animationId = requestAnimationFrame(animate)
+  }
+
+  function bindInteractiveElements() {
+    const container = containerRef?.value || document
+    const elements = container.querySelectorAll('a, button, [role="button"], .cursor-pointer')
+    elements.forEach((el) => {
+      el.addEventListener('mouseenter', onMouseEnterInteractive)
+      el.addEventListener('mouseleave', onMouseLeaveInteractive)
+    })
+    interactiveElements = Array.from(elements)
+  }
+
+  onMounted(() => {
+    // Detect touch device
+    if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+      isTouchDevice = true
+      return
+    }
+
+    const container = containerRef?.value || document.body
+    container.style.cursor = 'none'
+
+    // Also hide cursor on all child elements
+    const style = document.createElement('style')
+    style.id = 'custom-cursor-style'
+    style.textContent = `
+      [ref="container"] *, [ref="container"] a, [ref="container"] button {
+        cursor: none !important;
+      }
+    `
+    // Use a more targeted approach
+    container.querySelectorAll('*').forEach((el) => {
+      el.style.cursor = 'none'
+    })
+
+    // Create cursor elements
+    cursorDot = document.createElement('div')
+    cursorDot.className = `custom-cursor-dot cursor-${config.variant}`
+    cursorDot.style.setProperty('--cursor-color', config.color)
+
+    cursorRing = document.createElement('div')
+    cursorRing.className = `custom-cursor-ring cursor-${config.variant}`
+    cursorRing.style.setProperty('--cursor-color', config.color)
+
+    document.body.appendChild(cursorDot)
+    document.body.appendChild(cursorRing)
+
+    document.addEventListener('mousemove', onMouseMove)
+    animationId = requestAnimationFrame(animate)
+
+    // Bind interactive hover detection after DOM settles
+    setTimeout(bindInteractiveElements, 500)
+  })
+
+  onUnmounted(() => {
+    if (isTouchDevice) return
+
+    document.removeEventListener('mousemove', onMouseMove)
+    if (animationId) cancelAnimationFrame(animationId)
+    if (cursorDot) cursorDot.remove()
+    if (cursorRing) cursorRing.remove()
+
+    // Restore cursors
+    const container = containerRef?.value || document.body
+    container.style.cursor = ''
+    container.querySelectorAll('*').forEach((el) => {
+      el.style.cursor = ''
+    })
+
+    // Unbind interactive elements
+    interactiveElements.forEach((el) => {
+      el.removeEventListener('mouseenter', onMouseEnterInteractive)
+      el.removeEventListener('mouseleave', onMouseLeaveInteractive)
+    })
+    interactiveElements = []
+  })
+}

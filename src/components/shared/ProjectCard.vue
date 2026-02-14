@@ -62,7 +62,7 @@ function getDomain(url) {
       <div class="flex-1">
         <h3 class="text-xl font-bold mb-1" :style="{ color: accentColor }">{{ project.name }}</h3>
         <p class="text-sm text-zinc-400 leading-relaxed">{{ project.description }}</p>
-        <div class="flex flex-wrap gap-2 mt-3">
+        <div v-if="!expanded" class="flex flex-wrap gap-2 mt-3">
           <span v-for="tag in project.tags" :key="tag" class="text-xs px-2 py-0.5 rounded-full bg-zinc-900 text-zinc-500">{{ tag }}</span>
         </div>
 
@@ -94,7 +94,6 @@ function getDomain(url) {
   <div
     v-else-if="variant === 'card'"
     class="group bg-zinc-900/50 border border-zinc-800 rounded-2xl p-5 transition-all duration-300 cursor-pointer"
-    :class="expanded ? '' : 'hover:-translate-y-1'"
     :style="{ borderColor: expanded ? accentColor + '60' : '' }"
     @click="emit('toggle')"
     @mouseenter="!expanded && ($event.currentTarget.style.borderColor = accentColor + '80')"

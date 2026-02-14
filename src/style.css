@@ -253,3 +253,167 @@ body {
   transform: translateX(-50%) scale(1);
   opacity: 0.25;
 }
+
+/* V5: Slash pop animation */
+@keyframes slash-pop {
+  0% { transform: scale(1) rotate(0deg); }
+  30% { transform: scale(1.5) rotate(90deg); color: #fb7185; }
+  60% { transform: scale(0.85) rotate(-10deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+.slash-pop:hover {
+  animation: slash-pop 400ms ease-out;
+}
+
+/* ===== CUSTOM CURSOR ===== */
+
+.custom-cursor-dot,
+.custom-cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 9999;
+  will-change: transform;
+}
+
+/* V1 Neon: dot + pulsing ring */
+.custom-cursor-dot.cursor-neon {
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  margin-top: -3px;
+  border-radius: 50%;
+  background: var(--cursor-color);
+  box-shadow: 0 0 10px var(--cursor-color), 0 0 20px var(--cursor-color);
+  transition: width 0.2s, height 0.2s, margin 0.2s;
+}
+.custom-cursor-ring.cursor-neon {
+  width: 36px;
+  height: 36px;
+  margin-left: -18px;
+  margin-top: -18px;
+  border-radius: 50%;
+  border: 1.5px solid var(--cursor-color);
+  opacity: 0.5;
+  animation: cursor-neon-pulse 2s ease-in-out infinite;
+  transition: width 0.3s, height 0.3s, margin 0.3s, border-radius 0.3s;
+}
+@keyframes cursor-neon-pulse {
+  0%, 100% { box-shadow: 0 0 5px var(--cursor-color); opacity: 0.5; }
+  50% { box-shadow: 0 0 15px var(--cursor-color); opacity: 0.8; }
+}
+.custom-cursor-ring.cursor-neon.cursor-hover {
+  width: 50px;
+  height: 50px;
+  margin-left: -25px;
+  margin-top: -25px;
+}
+
+/* V2 Warm: soft blurred dot */
+.custom-cursor-dot.cursor-warm {
+  width: 10px;
+  height: 10px;
+  margin-left: -5px;
+  margin-top: -5px;
+  border-radius: 50%;
+  background: var(--cursor-color);
+  filter: blur(1px);
+  opacity: 0.8;
+  transition: width 0.3s, height 0.3s, margin 0.3s, filter 0.3s;
+}
+.custom-cursor-ring.cursor-warm {
+  display: none;
+}
+.custom-cursor-dot.cursor-warm.cursor-hover {
+  width: 18px;
+  height: 18px;
+  margin-left: -9px;
+  margin-top: -9px;
+  filter: blur(3px);
+}
+
+/* V3 Cards: dot + ring morphs to square */
+.custom-cursor-dot.cursor-cards {
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  margin-top: -3px;
+  border-radius: 50%;
+  background: var(--cursor-color);
+  transition: width 0.2s, height 0.2s, margin 0.2s;
+}
+.custom-cursor-ring.cursor-cards {
+  width: 36px;
+  height: 36px;
+  margin-left: -18px;
+  margin-top: -18px;
+  border-radius: 50%;
+  border: 1.5px solid var(--cursor-color);
+  opacity: 0.4;
+  transition: width 0.3s, height 0.3s, margin 0.3s, border-radius 0.3s;
+}
+.custom-cursor-ring.cursor-cards.cursor-hover {
+  border-radius: 4px;
+  width: 44px;
+  height: 44px;
+  margin-left: -22px;
+  margin-top: -22px;
+}
+
+/* V4 Terminal: blinking block cursor */
+.custom-cursor-dot.cursor-terminal {
+  width: 10px;
+  height: 16px;
+  margin-left: -5px;
+  margin-top: -8px;
+  border-radius: 0;
+  background: var(--cursor-color);
+  animation: cursor-terminal-blink 1s step-end infinite;
+  transition: width 0.2s, height 0.2s, margin 0.2s;
+}
+@keyframes cursor-terminal-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+.custom-cursor-ring.cursor-terminal {
+  display: none;
+}
+.custom-cursor-dot.cursor-terminal.cursor-hover {
+  width: 14px;
+  height: 20px;
+  margin-left: -7px;
+  margin-top: -10px;
+}
+
+/* V5 Minimal: thin crosshair lines */
+.custom-cursor-dot.cursor-minimal {
+  width: 1px;
+  height: 24px;
+  margin-left: 0;
+  margin-top: -12px;
+  background: var(--cursor-color);
+  opacity: 0.6;
+  border-radius: 0;
+  transition: height 0.2s, margin 0.2s, opacity 0.2s;
+}
+.custom-cursor-ring.cursor-minimal {
+  width: 24px;
+  height: 1px;
+  margin-left: -12px;
+  margin-top: 0;
+  background: var(--cursor-color);
+  opacity: 0.6;
+  border-radius: 0;
+  transition: width 0.2s, margin 0.2s, opacity 0.2s;
+}
+.custom-cursor-dot.cursor-minimal.cursor-hover {
+  height: 32px;
+  margin-top: -16px;
+  opacity: 1;
+}
+.custom-cursor-ring.cursor-minimal.cursor-hover {
+  width: 32px;
+  margin-left: -16px;
+  opacity: 1;
+}

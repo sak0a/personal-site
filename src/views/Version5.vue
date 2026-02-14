@@ -1,7 +1,8 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useScrollReveal } from '../composables/useScrollReveal'
 import { useMagnetic } from '../composables/useMagnetic'
+import { useCustomCursor } from '../composables/useCustomCursor'
 import ProjectCard from '../components/shared/ProjectCard.vue'
 import FooterSection from '../components/shared/FooterSection.vue'
 import { projects } from '../data/projects'
@@ -10,51 +11,38 @@ import { links } from '../data/links'
 const accent = '#fb7185'
 const container = ref(null)
 const expandedId = ref(null)
-const scrollProgress = ref(0)
+const heroReady = ref(false)
 useScrollReveal(container)
 const { onMove: magneticMove, onLeave: magneticLeave } = useMagnetic(8)
+useCustomCursor({ variant: 'minimal', color: accent }, container)
+
+const heroChars = ['s', 'a', 'k', 'a']
 
 function toggleProject(id) {
   expandedId.value = expandedId.value === id ? null : id
 }
 
-// Scroll progress tracking
-function onScroll() {
-  const scrollTop = window.scrollY
-  const docHeight = document.documentElement.scrollHeight - window.innerHeight
-  scrollProgress.value = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0
-}
-
 onMounted(() => {
-  window.addEventListener('scroll', onScroll, { passive: true })
-})
-
-onUnmounted(() => {
-  window.removeEventListener('scroll', onScroll)
+  setTimeout(() => { heroReady.value = true }, 100)
 })
 </script>
 
 <template>
   <div ref="container" class="max-w-2xl mx-auto px-6">
-    <!-- Scroll progress accent line (replaces static rose line) -->
-    <div class="fixed top-0 left-0 right-0 h-0.5 z-50">
-      <div
-        class="h-full bg-accent-rose transition-[width] duration-75 ease-linear"
-        :style="{ width: scrollProgress + '%' }"
-      />
-    </div>
-
-    <!-- Hero with spring animation + magnetic title -->
-    <section class="pt-32 pb-24 cursor-crosshair">
+    <!-- Hero with char-reveal + magnetic title -->
+    <section class="pt-32 pb-24">
       <h1
-        v-motion
-        :initial="{ opacity: 0, y: 50, scale: 0.95 }"
-        :enter="{ opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 100, damping: 15 } }"
         class="text-7xl md:text-8xl lg:text-9xl font-black tracking-tighter leading-none mb-6 inline-block"
         @mousemove="magneticMove"
         @mouseleave="magneticLeave"
       >
-        saka<span class="text-accent-rose">.</span>
+        <span class="char-reveal" :class="{ visible: heroReady }">
+          <span
+            v-for="(char, i) in heroChars"
+            :key="i"
+            :style="{ transitionDelay: `${i * 60}ms` }"
+          >{{ char }}</span><span class="text-accent-rose" :style="{ transitionDelay: `${heroChars.length * 60}ms` }">.</span>
+        </span>
       </h1>
       <p
         v-motion
@@ -92,7 +80,7 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <!-- Links with rotating slash separators -->
+    <!-- Links with playful slash separators -->
     <section class="reveal-slow py-20">
       <div class="flex flex-wrap items-center gap-x-1 gap-y-2">
         <template v-for="(link, i) in links" :key="link.name">
@@ -106,7 +94,7 @@ onUnmounted(() => {
           </a>
           <span
             v-if="i < links.length - 1"
-            class="text-accent-rose/40 mx-1 inline-block transition-transform duration-500 hover:rotate-[360deg] cursor-default"
+            class="text-accent-rose/40 mx-1 inline-block cursor-default slash-pop"
           >/</span>
         </template>
       </div>
