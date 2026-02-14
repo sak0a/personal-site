@@ -17,6 +17,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  staggerTitle: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emit = defineEmits(['toggle'])
@@ -229,12 +233,26 @@ function getDomain(url) {
   <!-- Large type variant (Version 5) -->
   <div v-else-if="variant === 'large-type'" class="py-8 group cursor-pointer" @click="emit('toggle')">
     <div class="flex items-center justify-between">
-      <span class="text-sm text-zinc-600">{{ project.year }}</span>
-      <svg class="w-4 h-4 text-zinc-600 transition-transform duration-300" :class="{ 'rotate-180': expanded }" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <span class="text-sm text-zinc-600 v5-year">{{ project.year }}</span>
+      <svg class="w-4 h-4 text-zinc-600 v5-chevron" :class="{ 'rotate-180': expanded }" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" :d="iconPaths.chevron" />
       </svg>
     </div>
+    <!-- Staggered char hover title -->
     <h3
+      v-if="staggerTitle"
+      class="v5-title-stagger text-2xl md:text-3xl font-bold mt-1 mb-2"
+      :style="{ '--accent': accentColor, color: expanded ? accentColor : '' }"
+    >
+      <span
+        v-for="(char, ci) in project.name.split('')"
+        :key="ci"
+        :style="{ transitionDelay: `${ci * 25}ms` }"
+      >{{ char === ' ' ? '\u00A0' : char }}</span>
+    </h3>
+    <!-- Standard title -->
+    <h3
+      v-else
       class="text-2xl md:text-3xl font-bold mt-1 mb-2 transition-colors duration-300"
       :style="expanded ? { color: accentColor } : {}"
       @mouseenter="$event.target.style.color = accentColor"
@@ -242,7 +260,7 @@ function getDomain(url) {
     >
       {{ project.name }}
     </h3>
-    <p class="text-zinc-400 leading-relaxed">{{ project.description }}</p>
+    <p class="text-zinc-400 leading-relaxed transition-colors duration-300 group-hover:text-zinc-300">{{ project.description }}</p>
 
     <!-- Expandable details -->
     <div class="grid transition-[grid-template-rows] duration-300 ease-out" :style="{ gridTemplateRows: expanded ? '1fr' : '0fr' }">

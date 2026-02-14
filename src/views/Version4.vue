@@ -166,7 +166,7 @@ onUnmounted(() => {
         </div>
       </section>
 
-      <FooterSection :accent-color="accent" />
+      <FooterSection :accent-color="accent" variant="terminal" />
     </div>
   </div>
 </template>

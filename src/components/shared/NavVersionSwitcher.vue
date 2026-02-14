@@ -5,11 +5,11 @@ import { computed } from 'vue'
 const route = useRoute()
 
 const versions = [
-  { path: '/1', label: '1', color: 'bg-accent-cyan' },
-  { path: '/2', label: '2', color: 'bg-accent-amber' },
-  { path: '/3', label: '3', color: 'bg-accent-violet' },
-  { path: '/4', label: '4', color: 'bg-accent-emerald' },
-  { path: '/5', label: '5', color: 'bg-accent-rose' },
+  { path: '/1', label: '1', color: 'bg-accent-cyan', hex: '#22d3ee' },
+  { path: '/2', label: '2', color: 'bg-accent-amber', hex: '#f59e0b' },
+  { path: '/3', label: '3', color: 'bg-accent-violet', hex: '#a78bfa' },
+  { path: '/4', label: '4', color: 'bg-accent-emerald', hex: '#34d399' },
+  { path: '/5', label: '5', color: 'bg-accent-rose', hex: '#fb7185' },
 ]
 
 const isVersionPage = computed(() => /^\/[1-5]$/.test(route.path))
@@ -30,6 +30,8 @@ const isVersionPage = computed(() => /^\/[1-5]$/.test(route.path))
           ? `${v.color} text-black scale-110`
           : 'bg-zinc-900 text-zinc-500 hover:text-white hover:bg-zinc-800'
       ]"
+      @mouseenter="route.path !== v.path && ($event.currentTarget.style.boxShadow = `0 0 12px ${v.hex}40, 0 0 4px ${v.hex}60`)"
+      @mouseleave="$event.currentTarget.style.boxShadow = ''"
     >
       {{ v.label }}
     </RouterLink>

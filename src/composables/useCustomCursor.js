@@ -21,6 +21,11 @@ export function useCustomCursor(config, containerRef) {
   let isTouchDevice = false
   let interactiveElements = []
 
+  // Rose trail state
+  let trailParticles = []
+  let trailFrame = 0
+  const TRAIL_MAX = 15
+
   const LERP_DOT = 0.15
   const LERP_RING = 0.08
 
@@ -43,6 +48,30 @@ export function useCustomCursor(config, containerRef) {
     if (cursorDot) cursorDot.classList.remove('cursor-hover')
   }
 
+  function spawnTrailParticle() {
+    if (trailParticles.length >= TRAIL_MAX) return
+    const particle = document.createElement('div')
+    particle.className = 'cursor-trail-particle'
+    particle.style.setProperty('--cursor-color', config.color)
+    particle.style.setProperty('--trail-pos', `translate(${dotX}px, ${dotY}px)`)
+    particle.style.transform = `translate(${dotX}px, ${dotY}px)`
+    document.body.appendChild(particle)
+    trailParticles.push(particle)
+    particle.addEventListener('animationend', () => {
+      particle.remove()
+      trailParticles = trailParticles.filter((p) => p !== particle)
+    })
+  }
+
+  function onMouseDown() {
+    if (!cursorRing || config.variant !== 'rose') return
+    cursorRing.style.setProperty('--ring-pos', `translate(${dotX}px, ${dotY}px)`)
+    cursorRing.classList.remove('cursor-click')
+    // Force reflow to restart animation
+    void cursorRing.offsetWidth
+    cursorRing.classList.add('cursor-click')
+  }
+
   function animate() {
     dotX = lerp(dotX, mouseX, LERP_DOT)
     dotY = lerp(dotY, mouseY, LERP_DOT)
@@ -54,6 +83,14 @@ export function useCustomCursor(config, containerRef) {
     }
     if (cursorRing) {
       cursorRing.style.transform = `translate(${ringX}px, ${ringY}px)`
+    }
+
+    // Rose trail: spawn particle every 3rd frame
+    if (config.variant === 'rose') {
+      trailFrame++
+      if (trailFrame % 3 === 0) {
+        spawnTrailParticle()
+      }
     }
 
     animationId = requestAnimationFrame(animate)
@@ -105,6 +142,9 @@ export function useCustomCursor(config, containerRef) {
     document.body.appendChild(cursorRing)
 
     document.addEventListener('mousemove', onMouseMove)
+    if (config.variant === 'rose') {
+      document.addEventListener('mousedown', onMouseDown)
+    }
     animationId = requestAnimationFrame(animate)
 
     // Bind interactive hover detection after DOM settles
@@ -115,9 +155,14 @@ export function useCustomCursor(config, containerRef) {
     if (isTouchDevice) return
 
     document.removeEventListener('mousemove', onMouseMove)
+    document.removeEventListener('mousedown', onMouseDown)
     if (animationId) cancelAnimationFrame(animationId)
     if (cursorDot) cursorDot.remove()
     if (cursorRing) cursorRing.remove()
+
+    // Cleanup trail particles
+    trailParticles.forEach((p) => p.remove())
+    trailParticles = []
 
     // Restore cursors
     const container = containerRef?.value || document.body

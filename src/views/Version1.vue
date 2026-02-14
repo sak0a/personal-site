@@ -91,6 +91,6 @@ const heroChars = ['s', 'a', 'k', 'a']
       </div>
     </section>
 
-    <FooterSection :accent-color="accent" />
+    <FooterSection :accent-color="accent" variant="neon" />
   </div>
 </template>

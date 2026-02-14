@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useScrollReveal } from '../composables/useScrollReveal'
 import { useMagnetic } from '../composables/useMagnetic'
 import { useCustomCursor } from '../composables/useCustomCursor'
@@ -12,9 +12,10 @@ const accent = '#fb7185'
 const container = ref(null)
 const expandedId = ref(null)
 const heroReady = ref(false)
+const dividerEls = ref([])
 useScrollReveal(container)
 const { onMove: magneticMove, onLeave: magneticLeave } = useMagnetic(8)
-useCustomCursor({ variant: 'minimal', color: accent }, container)
+useCustomCursor({ variant: 'rose', color: accent })
 
 const heroChars = ['s', 'a', 'k', 'a']
 
@@ -22,8 +23,36 @@ function toggleProject(id) {
   expandedId.value = expandedId.value === id ? null : id
 }
 
+// Divider replay observer — toggles .visible on/off each time
+let dividerObserver = null
+
 onMounted(() => {
   setTimeout(() => { heroReady.value = true }, 100)
+
+  // Set up divider replay observer
+  dividerObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible')
+        } else {
+          entry.target.classList.remove('visible')
+        }
+      })
+    },
+    { threshold: 0.3 }
+  )
+
+  // Observe all dividers after DOM settles
+  setTimeout(() => {
+    dividerEls.value.forEach((el) => {
+      if (el) dividerObserver.observe(el)
+    })
+  }, 100)
+})
+
+onUnmounted(() => {
+  dividerObserver?.disconnect()
 })
 </script>
 
@@ -73,14 +102,19 @@ onMounted(() => {
           variant="large-type"
           :accent-color="accent"
           :expanded="expandedId === project.id"
+          :stagger-title="true"
           @toggle="toggleProject(project.id)"
         />
-        <!-- Divider that draws on scroll -->
-        <div v-if="i < projects.length - 1" class="reveal-slow divider-draw my-2 w-full h-px bg-accent-rose/20 origin-left" />
+        <!-- Divider that replays animation on each scroll -->
+        <div
+          v-if="i < projects.length - 1"
+          :ref="el => { if (el) dividerEls[i] = el }"
+          class="divider-draw my-2 w-full h-px bg-accent-rose/20 origin-left"
+        />
       </div>
     </div>
 
-    <!-- Links with playful slash separators -->
+    <!-- Links with slash morph separators -->
     <section class="reveal-slow py-20">
       <div class="flex flex-wrap items-center gap-x-1 gap-y-2">
         <template v-for="(link, i) in links" :key="link.name">
@@ -88,18 +122,22 @@ onMounted(() => {
             :href="link.url"
             target="_blank"
             rel="noopener noreferrer"
-            class="text-zinc-500 hover:text-accent-rose transition-colors duration-300 hover:underline underline-offset-4"
+            class="v5-link"
           >
-            {{ link.name }}
+            <span class="v5-link-text text-zinc-500">{{ link.name }}</span>
+            <span class="v5-link-line" />
           </a>
           <span
             v-if="i < links.length - 1"
-            class="text-accent-rose/40 mx-1 inline-block cursor-default slash-pop"
-          >/</span>
+            class="slash-morph text-accent-rose/40 mx-1 cursor-default"
+          >
+            <span class="slash-morph-from">/</span>
+            <span class="slash-morph-to absolute inset-0 flex items-center justify-center">~</span>
+          </span>
         </template>
       </div>
     </section>
 
-    <FooterSection :accent-color="accent" />
+    <FooterSection :accent-color="accent" variant="rose" />
   </div>
 </template>

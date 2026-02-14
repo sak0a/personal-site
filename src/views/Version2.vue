@@ -80,7 +80,7 @@ function toggleProject(id) {
         </div>
       </section>
 
-      <FooterSection :accent-color="accent" />
+      <FooterSection :accent-color="accent" variant="warm" />
     </div>
   </div>
 </template>
