@@ -285,6 +285,22 @@ body {
   box-shadow: 0 2px 8px var(--tag-color);
 }
 
+/* V5: Stack item hover glow */
+.v5-stack-item:hover > div {
+  box-shadow: 0 0 20px var(--accent, #fb7185)10, 0 0 4px var(--accent, #fb7185)08;
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+/* V5: Heatmap cell hover */
+.heatmap-cell {
+  transition: opacity 0.15s ease;
+}
+.heatmap-cell:hover {
+  opacity: 0.8;
+  stroke: #fff;
+  stroke-width: 1;
+}
+
 /* V5: Cascading expand reveal */
 .v5-expand-image {
   opacity: 0;

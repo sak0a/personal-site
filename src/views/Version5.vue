@@ -87,7 +87,7 @@ onUnmounted(() => {
     </section>
 
     <!-- Projects -->
-    <section class="reveal-slow pb-6">
+    <section class="reveal-slow pb-2">
       <h2 class="text-2xl font-bold mb-10 v5-heading-line" :style="{ '--accent': accent }">
         projects
       </h2>
@@ -118,7 +118,7 @@ onUnmounted(() => {
     </div>
 
     <!-- Tech Stack -->
-    <section class="reveal-slow pt-20 pb-6">
+    <section class="reveal-slow pt-20 pb-2">
       <h2 class="text-2xl font-bold mb-10 v5-heading-line" :style="{ '--accent': accent }">
         stack
       </h2>
@@ -131,7 +131,7 @@ onUnmounted(() => {
         class="reveal-slow v5-stack-item group"
         :style="{ transitionDelay: `${i * 60}ms`, '--accent': accent }"
       >
-        <div class="flex flex-col items-center gap-2.5 py-4 px-3 rounded-lg border border-zinc-800/50 transition-all duration-300 group-hover:border-zinc-700">
+        <div class="flex flex-col items-center gap-2.5 py-3 px-3 rounded-lg border border-zinc-800/50 transition-all duration-300 group-hover:border-zinc-700">
           <div class="w-8 h-8 transition-transform duration-300 group-hover:scale-110" v-html="tech.icon" />
           <span class="text-xs text-zinc-500 transition-colors duration-300 group-hover:text-zinc-300">{{ tech.name }}</span>
         </div>
@@ -139,7 +139,7 @@ onUnmounted(() => {
     </div>
 
     <!-- GitHub Activity -->
-    <section class="reveal-slow pt-20 pb-6">
+    <section class="reveal-slow pt-20 pb-2">
       <h2 class="text-2xl font-bold mb-10 v5-heading-line" :style="{ '--accent': accent }">
         activity
       </h2>

@@ -1,7 +1,7 @@
 export const links = [
   {
     name: 'GitHub',
-    url: 'https://github.com',
+    url: 'https://github.com/sak0a',
     icon: 'github',
   },
   {
