@@ -1,4 +1,5 @@
 <script setup>
+import { ref, watch } from 'vue'
 import TextEffect from './TextEffect.vue'
 
 const props = defineProps({
@@ -66,6 +67,13 @@ function getDomain(url) {
 }
 
 const isIcon = props.project.imageType === 'icon'
+
+/* Only load image src once the card has been expanded at least once */
+const imageLoaded = ref(false)
+watch(() => props.expanded, (val) => {
+  if (val) imageLoaded.value = true
+}, { immediate: true })
+const imageSrc = () => imageLoaded.value ? props.project.image : undefined
 </script>
 
 <template>
@@ -249,10 +257,10 @@ const isIcon = props.project.imageType === 'icon'
     <div v-if="!hideDetails" class="grid transition-[grid-template-rows] duration-300 ease-out" :style="{ gridTemplateRows: expanded ? '1fr' : '0fr' }">
       <div class="overflow-hidden">
         <div class="pt-4">
-          <!-- Image — cascade step 1 -->
+          <!-- Image — cascade step 1 (src only set once expanded) -->
           <img
             v-if="isIcon"
-            :src="project.image"
+            :src="imageSrc()"
             :alt="project.name"
             loading="lazy"
             decoding="async"
@@ -263,7 +271,7 @@ const isIcon = props.project.imageType === 'icon'
           />
           <img
             v-else
-            :src="project.image"
+            :src="imageSrc()"
             :alt="project.name"
             loading="lazy"
             decoding="async"
