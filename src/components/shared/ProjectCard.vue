@@ -29,12 +29,33 @@ const iconPaths = {
   github: 'M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.604-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.464-1.11-1.464-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z',
   external: 'M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25',
   chevron: 'M19.5 8.25l-7.5 7.5-7.5-7.5',
+  npm: 'M3 3h18v18H3V3zm2.25 2.25v13.5h4.5V7.5h4.5v11.25h2.25V5.25H5.25z',
+  docs: 'M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25',
+  packagist: 'M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-5.25l-4.5 2.6v5.2L12 17.15l4.5-2.6v-5.2L12 6.75zm0 1.15l3.4 1.96L12 11.82 8.6 9.86 12 7.9zm-3.9 6.45V10l3.9 2.25v4.35l-3.9-2.25z',
+}
+
+const linkMeta = {
+  github: { icon: iconPaths.github, label: 'Source', fill: true },
+  npm: { icon: iconPaths.npm, label: 'npm', fill: true },
+  packagist: { icon: iconPaths.packagist, label: 'Packagist', fill: true },
+  docs: { icon: iconPaths.docs, label: 'Docs', fill: false },
+  external: { icon: iconPaths.external, label: null, fill: false },
+}
+
+function getLinkInfo(link) {
+  const meta = linkMeta[link.type] || linkMeta.external
+  return {
+    ...meta,
+    label: meta.label || getDomain(link.url),
+  }
 }
 
 function getDomain(url) {
   try { return new URL(url).hostname.replace('www.', '') }
   catch { return url }
 }
+
+const isIcon = props.project.imageType === 'icon'
 </script>
 
 <template>
@@ -58,6 +79,13 @@ function getDomain(url) {
     </div>
     <div class="flex flex-col md:flex-row gap-4">
       <img
+        v-if="isIcon"
+        :src="project.image"
+        :alt="project.name"
+        class="w-16 h-16 object-contain rounded-lg opacity-80 group-hover:opacity-100 transition-all duration-300 shrink-0"
+      />
+      <img
+        v-else
         :src="project.image"
         :alt="project.name"
         class="object-cover rounded-lg opacity-80 group-hover:opacity-100 transition-all duration-300"
@@ -75,13 +103,20 @@ function getDomain(url) {
           <div class="overflow-hidden">
             <div class="pt-3 transition-opacity duration-200" :class="expanded ? 'opacity-100 delay-150' : 'opacity-0'">
               <div class="flex items-center gap-4 mb-3">
-                <a v-if="project.url" :href="project.url" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-sm text-zinc-500 transition-colors" @click.stop @mouseenter="$event.currentTarget.style.color = accentColor" @mouseleave="$event.currentTarget.style.color = ''">
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" :d="iconPaths.external" /></svg>
-                  {{ getDomain(project.url) }}
-                </a>
-                <a v-if="project.github" :href="project.github" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-sm text-zinc-500 transition-colors" @click.stop @mouseenter="$event.currentTarget.style.color = accentColor" @mouseleave="$event.currentTarget.style.color = ''">
-                  <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path :d="iconPaths.github" /></svg>
-                  Source
+                <a
+                  v-for="link in project.links"
+                  :key="link.type"
+                  :href="link.url"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-flex items-center gap-1.5 text-sm text-zinc-500 transition-colors"
+                  @click.stop
+                  @mouseenter="$event.currentTarget.style.color = accentColor"
+                  @mouseleave="$event.currentTarget.style.color = ''"
+                >
+                  <svg v-if="getLinkInfo(link).fill" class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path :d="getLinkInfo(link).icon" /></svg>
+                  <svg v-else class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" :d="getLinkInfo(link).icon" /></svg>
+                  {{ getLinkInfo(link).label }}
                 </a>
               </div>
               <div class="flex flex-wrap gap-1.5">
@@ -101,7 +136,11 @@ function getDomain(url) {
     :style="{ borderTopColor: accentColor }"
     @click="emit('toggle')"
   >
+    <div v-if="isIcon" class="p-6">
+      <img :src="project.image" :alt="project.name" class="w-16 h-16 object-contain opacity-80 group-hover:opacity-100 transition-opacity" />
+    </div>
     <img
+      v-else
       :src="project.image"
       :alt="project.name"
       class="w-full h-44 object-cover opacity-80 group-hover:opacity-100 transition-opacity"
@@ -124,13 +163,20 @@ function getDomain(url) {
         <div class="overflow-hidden">
           <div class="pt-3 transition-opacity duration-200" :class="expanded ? 'opacity-100 delay-150' : 'opacity-0'">
             <div class="flex items-center gap-4 mb-3">
-              <a v-if="project.url" :href="project.url" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-sm text-zinc-500 transition-colors" @click.stop @mouseenter="$event.currentTarget.style.color = accentColor" @mouseleave="$event.currentTarget.style.color = ''">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" :d="iconPaths.external" /></svg>
-                {{ getDomain(project.url) }}
-              </a>
-              <a v-if="project.github" :href="project.github" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-sm text-zinc-500 transition-colors" @click.stop @mouseenter="$event.currentTarget.style.color = accentColor" @mouseleave="$event.currentTarget.style.color = ''">
-                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path :d="iconPaths.github" /></svg>
-                Source
+              <a
+                v-for="link in project.links"
+                :key="link.type"
+                :href="link.url"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-1.5 text-sm text-zinc-500 transition-colors"
+                @click.stop
+                @mouseenter="$event.currentTarget.style.color = accentColor"
+                @mouseleave="$event.currentTarget.style.color = ''"
+              >
+                <svg v-if="getLinkInfo(link).fill" class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path :d="getLinkInfo(link).icon" /></svg>
+                <svg v-else class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" :d="getLinkInfo(link).icon" /></svg>
+                {{ getLinkInfo(link).label }}
               </a>
             </div>
             <div class="flex flex-wrap gap-1.5">
@@ -180,6 +226,14 @@ function getDomain(url) {
         <div class="pt-4">
           <!-- Image — cascade step 1 -->
           <img
+            v-if="isIcon"
+            :src="project.image"
+            :alt="project.name"
+            class="w-16 h-16 object-contain rounded-lg mb-4"
+            :class="staggerTitle ? ['v5-expand-image', { show: expanded }] : [expanded ? 'opacity-90' : 'opacity-0', 'transition-opacity duration-200']"
+          />
+          <img
+            v-else
             :src="project.image"
             :alt="project.name"
             class="w-full max-w-md h-48 object-cover rounded-lg mb-4"
@@ -191,13 +245,20 @@ function getDomain(url) {
             class="flex items-center gap-4 mb-3"
             :class="staggerTitle ? ['v5-expand-links', { show: expanded }] : [expanded ? 'opacity-100' : 'opacity-0', 'transition-opacity duration-200']"
           >
-            <a v-if="project.url" :href="project.url" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-sm text-zinc-500 transition-colors" @click.stop @mouseenter="$event.currentTarget.style.color = accentColor" @mouseleave="$event.currentTarget.style.color = ''">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" :d="iconPaths.external" /></svg>
-              {{ getDomain(project.url) }}
-            </a>
-            <a v-if="project.github" :href="project.github" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-sm text-zinc-500 transition-colors" @click.stop @mouseenter="$event.currentTarget.style.color = accentColor" @mouseleave="$event.currentTarget.style.color = ''">
-              <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path :d="iconPaths.github" /></svg>
-              Source
+            <a
+              v-for="link in project.links"
+              :key="link.type"
+              :href="link.url"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-1.5 text-sm text-zinc-500 transition-colors"
+              @click.stop
+              @mouseenter="$event.currentTarget.style.color = accentColor"
+              @mouseleave="$event.currentTarget.style.color = ''"
+            >
+              <svg v-if="getLinkInfo(link).fill" class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path :d="getLinkInfo(link).icon" /></svg>
+              <svg v-else class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" :d="getLinkInfo(link).icon" /></svg>
+              {{ getLinkInfo(link).label }}
             </a>
           </div>
 
@@ -247,18 +308,32 @@ function getDomain(url) {
       <div class="overflow-hidden">
         <div class="pt-4 transition-opacity duration-200" :class="expanded ? 'opacity-100 delay-150' : 'opacity-0'">
           <img
+            v-if="isIcon"
+            :src="project.image"
+            :alt="project.name"
+            class="w-16 h-16 object-contain mb-4 opacity-90"
+          />
+          <img
+            v-else
             :src="project.image"
             :alt="project.name"
             class="w-full max-w-md h-48 object-cover rounded-none mb-4 opacity-90"
           />
           <div class="flex items-center gap-4 mb-3">
-            <a v-if="project.url" :href="project.url" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-sm font-mono text-zinc-500 uppercase transition-colors" @click.stop @mouseenter="$event.currentTarget.style.color = accentColor" @mouseleave="$event.currentTarget.style.color = ''">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" :d="iconPaths.external" /></svg>
-              {{ getDomain(project.url) }}
-            </a>
-            <a v-if="project.github" :href="project.github" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-sm font-mono text-zinc-500 uppercase transition-colors" @click.stop @mouseenter="$event.currentTarget.style.color = accentColor" @mouseleave="$event.currentTarget.style.color = ''">
-              <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path :d="iconPaths.github" /></svg>
-              Source
+            <a
+              v-for="link in project.links"
+              :key="link.type"
+              :href="link.url"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-1.5 text-sm font-mono text-zinc-500 uppercase transition-colors"
+              @click.stop
+              @mouseenter="$event.currentTarget.style.color = accentColor"
+              @mouseleave="$event.currentTarget.style.color = ''"
+            >
+              <svg v-if="getLinkInfo(link).fill" class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path :d="getLinkInfo(link).icon" /></svg>
+              <svg v-else class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" :d="getLinkInfo(link).icon" /></svg>
+              {{ getLinkInfo(link).label }}
             </a>
           </div>
           <div class="flex flex-wrap gap-2">
@@ -286,6 +361,13 @@ function getDomain(url) {
       <!-- Image column -->
       <div :class="project.id % 2 === 0 ? 'md:order-2' : ''">
         <img
+          v-if="isIcon"
+          :src="project.image"
+          :alt="project.name"
+          class="w-16 h-16 object-contain rounded-sm"
+        />
+        <img
+          v-else
           :src="project.image"
           :alt="project.name"
           class="w-full h-56 object-cover rounded-sm editorial-image"
@@ -315,11 +397,20 @@ function getDomain(url) {
       <div class="overflow-hidden">
         <div class="pt-6 transition-opacity duration-200" :class="expanded ? 'opacity-100 delay-150' : 'opacity-0'">
           <div class="flex items-center gap-6 mb-4">
-            <a v-if="project.url" :href="project.url" target="_blank" rel="noopener noreferrer" class="editorial-link text-sm text-zinc-500 transition-colors" :style="{ '--accent': accentColor }" @click.stop @mouseenter="$event.currentTarget.style.color = accentColor" @mouseleave="$event.currentTarget.style.color = ''">
-              <svg class="w-3.5 h-3.5 inline mr-1.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" :d="iconPaths.external" /></svg>{{ getDomain(project.url) }}
-            </a>
-            <a v-if="project.github" :href="project.github" target="_blank" rel="noopener noreferrer" class="editorial-link text-sm text-zinc-500 transition-colors" :style="{ '--accent': accentColor }" @click.stop @mouseenter="$event.currentTarget.style.color = accentColor" @mouseleave="$event.currentTarget.style.color = ''">
-              <svg class="w-3.5 h-3.5 inline mr-1.5" fill="currentColor" viewBox="0 0 24 24"><path :d="iconPaths.github" /></svg>Source
+            <a
+              v-for="link in project.links"
+              :key="link.type"
+              :href="link.url"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="editorial-link text-sm text-zinc-500 transition-colors"
+              :style="{ '--accent': accentColor }"
+              @click.stop
+              @mouseenter="$event.currentTarget.style.color = accentColor"
+              @mouseleave="$event.currentTarget.style.color = ''"
+            >
+              <svg v-if="getLinkInfo(link).fill" class="w-3.5 h-3.5 inline mr-1.5" fill="currentColor" viewBox="0 0 24 24"><path :d="getLinkInfo(link).icon" /></svg>
+              <svg v-else class="w-3.5 h-3.5 inline mr-1.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" :d="getLinkInfo(link).icon" /></svg>{{ getLinkInfo(link).label }}
             </a>
           </div>
           <p class="text-sm text-zinc-500 italic">

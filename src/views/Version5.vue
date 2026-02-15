@@ -4,9 +4,11 @@ import { useScrollReveal } from '../composables/useScrollReveal'
 import { useMagnetic } from '../composables/useMagnetic'
 import { useCustomCursor } from '../composables/useCustomCursor'
 import ProjectCard from '../components/shared/ProjectCard.vue'
+import GitHubHeatmap from '../components/shared/GitHubHeatmap.vue'
 import FooterSection from '../components/shared/FooterSection.vue'
 import { projects } from '../data/projects'
 import { links } from '../data/links'
+import { stack } from '../data/stack'
 
 const accent = '#fb7185'
 const container = ref(null)
@@ -113,6 +115,38 @@ onUnmounted(() => {
           class="divider-draw my-2 w-full h-px bg-accent-rose/20 origin-left"
         />
       </div>
+    </div>
+
+    <!-- Tech Stack -->
+    <section class="reveal-slow pt-20 pb-6">
+      <h2 class="text-2xl font-bold mb-10 v5-heading-line" :style="{ '--accent': accent }">
+        stack
+      </h2>
+    </section>
+
+    <div class="grid grid-cols-3 sm:grid-cols-4 gap-3">
+      <div
+        v-for="(tech, i) in stack"
+        :key="tech.name"
+        class="reveal-slow v5-stack-item group"
+        :style="{ transitionDelay: `${i * 60}ms`, '--accent': accent }"
+      >
+        <div class="flex flex-col items-center gap-2.5 py-4 px-3 rounded-lg border border-zinc-800/50 transition-all duration-300 group-hover:border-zinc-700">
+          <div class="w-8 h-8 transition-transform duration-300 group-hover:scale-110" v-html="tech.icon" />
+          <span class="text-xs text-zinc-500 transition-colors duration-300 group-hover:text-zinc-300">{{ tech.name }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- GitHub Activity -->
+    <section class="reveal-slow pt-20 pb-6">
+      <h2 class="text-2xl font-bold mb-10 v5-heading-line" :style="{ '--accent': accent }">
+        activity
+      </h2>
+    </section>
+
+    <div class="reveal-slow">
+      <GitHubHeatmap username="sak0a" :accent-color="accent" />
     </div>
 
   </div>
