@@ -82,7 +82,7 @@ onUnmounted(() => {
         :enter="{ opacity: 1, y: 0, transition: { delay: 300, duration: 800 } }"
         class="text-xl text-zinc-500 leading-relaxed"
       >
-        creating all types of projects for things i'm interested in — specially web projects.
+        I'm creating all types of projects for things i'm interested in — specially web projects.
       </p>
     </section>
 

@@ -211,11 +211,10 @@ function formatDate(dateStr) {
    
         <!--<span class="text-2xl font-bold" :style="{ color: accentColor }">{{ totalCount.toLocaleString() }}</span>-->
         <AnimatedNumber
-    :value="displayCount"
-    :spring-options="{ stiffness: 100, damping: 80, mass: 0.5 }"
-    class="text-2xl font-bold"
-    :style="{ color: accentColor }"
-  />
+        :value="displayCount"
+        :spring-options="{ stiffness: 100, damping: 80, mass: 0.5 }"
+        class="text-2xl font-bold"
+        :style="{ color: accentColor }" />
         <span class="text-sm text-zinc-500">contributions in the last 12 months</span>
       </div>
 
