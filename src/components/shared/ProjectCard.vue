@@ -92,12 +92,16 @@ const isIcon = props.project.imageType === 'icon'
         v-if="isIcon"
         :src="project.image"
         :alt="project.name"
+        loading="lazy"
+        decoding="async"
         class="w-16 h-16 object-contain rounded-lg opacity-80 group-hover:opacity-100 transition-all duration-300 shrink-0"
       />
       <img
         v-else
         :src="project.image"
         :alt="project.name"
+        loading="lazy"
+        decoding="async"
         class="object-cover rounded-lg opacity-80 group-hover:opacity-100 transition-all duration-300"
         :class="expanded ? 'w-full md:w-64 h-48' : 'w-full md:w-48 h-32'"
       />
@@ -147,12 +151,14 @@ const isIcon = props.project.imageType === 'icon'
     @click="emit('toggle')"
   >
     <div v-if="isIcon" class="p-6">
-      <img :src="project.image" :alt="project.name" class="w-16 h-16 object-contain opacity-80 group-hover:opacity-100 transition-opacity" />
+      <img :src="project.image" :alt="project.name" loading="lazy" decoding="async" class="w-16 h-16 object-contain opacity-80 group-hover:opacity-100 transition-opacity" />
     </div>
     <img
       v-else
       :src="project.image"
       :alt="project.name"
+      loading="lazy"
+      decoding="async"
       class="w-full h-44 object-cover opacity-80 group-hover:opacity-100 transition-opacity"
     />
     <div class="p-5">
@@ -248,6 +254,10 @@ const isIcon = props.project.imageType === 'icon'
             v-if="isIcon"
             :src="project.image"
             :alt="project.name"
+            loading="lazy"
+            decoding="async"
+            width="64"
+            height="64"
             class="w-16 h-16 object-contain rounded-lg mb-4"
             :class="staggerTitle ? ['v5-expand-image', { show: expanded }] : [expanded ? 'opacity-90' : 'opacity-0', 'transition-opacity duration-200']"
           />
@@ -255,6 +265,10 @@ const isIcon = props.project.imageType === 'icon'
             v-else
             :src="project.image"
             :alt="project.name"
+            loading="lazy"
+            decoding="async"
+            width="448"
+            height="192"
             class="w-full max-w-md h-48 object-cover rounded-lg mb-4"
             :class="staggerTitle ? ['v5-expand-image', { show: expanded }] : [expanded ? 'opacity-90' : 'opacity-0', 'transition-opacity duration-200']"
           />
@@ -330,12 +344,16 @@ const isIcon = props.project.imageType === 'icon'
             v-if="isIcon"
             :src="project.image"
             :alt="project.name"
+            loading="lazy"
+            decoding="async"
             class="w-16 h-16 object-contain mb-4 opacity-90"
           />
           <img
             v-else
             :src="project.image"
             :alt="project.name"
+            loading="lazy"
+            decoding="async"
             class="w-full max-w-md h-48 object-cover rounded-none mb-4 opacity-90"
           />
           <div class="flex items-center gap-4 mb-3">
@@ -383,12 +401,16 @@ const isIcon = props.project.imageType === 'icon'
           v-if="isIcon"
           :src="project.image"
           :alt="project.name"
+          loading="lazy"
+          decoding="async"
           class="w-16 h-16 object-contain rounded-sm"
         />
         <img
           v-else
           :src="project.image"
           :alt="project.name"
+          loading="lazy"
+          decoding="async"
           class="w-full h-56 object-cover rounded-sm editorial-image"
         />
       </div>
