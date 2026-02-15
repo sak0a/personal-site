@@ -25,11 +25,39 @@ function toggleProject(id) {
   expandedId.value = expandedId.value === id ? null : id
 }
 
+// Marquee — JS-driven for smooth speed transitions on hover
+const marqueeEl = ref(null)
+const marqueeHovered = ref(false)
+
+const SPEED_NORMAL = 0.5 // px per frame
+const SPEED_SLOW = 0.1
+let marqueeOffset = 0
+let currentSpeed = SPEED_NORMAL
+let marqueeRaf = null
+
+function tickMarquee() {
+  if (!marqueeEl.value) return
+  // Lerp speed toward target for smooth transition
+  const target = marqueeHovered.value ? SPEED_SLOW : SPEED_NORMAL
+  currentSpeed += (target - currentSpeed) * 0.06
+
+  marqueeOffset += currentSpeed
+  // Half-width = one full set of items; reset seamlessly
+  const halfWidth = marqueeEl.value.scrollWidth / 2
+  if (marqueeOffset >= halfWidth) marqueeOffset -= halfWidth
+
+  marqueeEl.value.style.transform = `translateX(-${marqueeOffset}px)`
+  marqueeRaf = requestAnimationFrame(tickMarquee)
+}
+
 // Divider replay observer — toggles .visible on/off each time
 let dividerObserver = null
 
 onMounted(() => {
   setTimeout(() => { heroReady.value = true }, 100)
+
+  // Start marquee loop
+  marqueeRaf = requestAnimationFrame(tickMarquee)
 
   // Set up divider replay observer
   dividerObserver = new IntersectionObserver(
@@ -55,6 +83,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   dividerObserver?.disconnect()
+  if (marqueeRaf) cancelAnimationFrame(marqueeRaf)
 })
 </script>
 
@@ -124,16 +153,22 @@ onUnmounted(() => {
       </h2>
     </section>
 
-    <div class="grid grid-cols-3 sm:grid-cols-4 gap-3">
-      <div
-        v-for="(tech, i) in stack"
-        :key="tech.name"
-        class="reveal-slow v5-stack-item group"
-        :style="{ transitionDelay: `${i * 60}ms`, '--accent': accent }"
-      >
-        <div class="flex flex-col items-center gap-2.5 py-3 px-3 rounded-lg border border-zinc-800/50 transition-all duration-300 group-hover:border-zinc-700">
-          <div class="w-8 h-8 transition-transform duration-300 group-hover:scale-110" v-html="tech.icon" />
-          <span class="text-xs text-zinc-500 transition-colors duration-300 group-hover:text-zinc-300">{{ tech.name }}</span>
+    <div
+      class="reveal-slow stack-marquee-wrap overflow-hidden"
+      :style="{ '--accent': accent }"
+      @mouseenter="marqueeHovered = true"
+      @mouseleave="marqueeHovered = false"
+    >
+      <div ref="marqueeEl" class="stack-marquee">
+        <div
+          v-for="(tech, i) in [...stack, ...stack]"
+          :key="i + '-' + tech.name"
+          class="v5-stack-item group shrink-0"
+        >
+          <div class="flex flex-col items-center gap-2.5 py-3 px-5 rounded-lg border border-zinc-800/50 transition-all duration-300 group-hover:border-zinc-700">
+            <div class="w-8 h-8 transition-transform duration-300 group-hover:scale-110" v-html="tech.icon" />
+            <span class="text-xs text-zinc-500 transition-colors duration-300 group-hover:text-zinc-300">{{ tech.name }}</span>
+          </div>
         </div>
       </div>
     </div>

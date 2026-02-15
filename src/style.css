@@ -291,6 +291,23 @@ body {
   background-color: rgba(255, 255, 255, 0.02);
 }
 
+/* V5: Infinite stack marquee */
+.stack-marquee-wrap {
+  mask-image: linear-gradient(to right, transparent, black 40px, black calc(100% - 40px), transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 40px, black calc(100% - 40px), transparent);
+}
+
+.stack-marquee {
+  display: flex;
+  gap: 0.75rem;
+  width: max-content;
+}
+
+@keyframes stack-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
 /* V5: Heatmap cell hover */
 .heatmap-cell {
   transition: opacity 0.15s ease;
