@@ -224,7 +224,7 @@ onUnmounted(() => {
   <div>
   <div ref="container" :class="containerClass">
     <!-- Hero with char-reveal + magnetic title -->
-    <section class="pt-32 pb-24" :class="wideLayout ? 'lg:pb-32' : ''">
+    <section class="min-h-screen flex flex-col justify-center pb-16 pt-24" :class="wideLayout ? 'lg:pb-20' : ''">
       <div class="inline-block mb-6">
         <h1
           class="v5-hero-title font-black tracking-tighter leading-none inline-block relative"
