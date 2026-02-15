@@ -4,7 +4,7 @@ import { onMounted, onUnmounted } from 'vue'
  * Custom cursor composable with smooth lerp following.
  *
  * @param {Object} config
- * @param {string} config.variant - 'neon' | 'warm' | 'cards' | 'terminal' | 'minimal'
+ * @param {string} config.variant - 'neon' | 'terminal' | 'rose' | 'brutalist' | 'editorial'
  * @param {string} config.color - accent color hex
  * @param {import('vue').Ref<HTMLElement>} containerRef - ref to scope cursor to
  */

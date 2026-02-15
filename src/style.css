@@ -4,8 +4,9 @@
   --font-sans: "Inter", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
   --color-accent-cyan: #22d3ee;
-  --color-accent-amber: #f59e0b;
-  --color-accent-violet: #a78bfa;
+  --color-accent-sky: #38bdf8;
+  --color-accent-gold: #eab308;
+  --font-serif: "Playfair Display", serif;
   --color-accent-emerald: #34d399;
   --color-accent-rose: #fb7185;
 }
@@ -126,81 +127,7 @@ body {
   transform: translateY(0);
 }
 
-/* V2: Breathing ambient blob */
-@keyframes breathe {
-  0%, 100% { transform: translate(-50%, 0) scale(1); }
-  50% { transform: translate(-50%, -10px) scale(1.1); }
-}
-.blob-breathe {
-  animation: breathe 8s ease-in-out infinite;
-}
 
-/* V2: Underline grow on scroll */
-.underline-grow {
-  width: 3rem;
-  transition: width 0.8s ease;
-}
-.underline-grow.visible {
-  width: 6rem;
-}
-
-/* V2: Separator draw from center */
-.separator-draw {
-  width: 0;
-  transition: width 0.6s ease;
-}
-.separator-draw.visible {
-  width: 4rem;
-}
-
-/* V2: Image glow pulse on hover */
-@keyframes glow-pulse {
-  0%, 100% { box-shadow: 0 0 0 transparent; }
-  50% { box-shadow: 0 0 20px var(--glow-color), 0 0 40px var(--glow-color); }
-}
-.image-glow-hover:hover {
-  animation: glow-pulse 2s ease-in-out infinite;
-}
-
-/* V3: Animated conic gradient border on hover */
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-.card-glow-border {
-  position: relative;
-  z-index: 0;
-}
-.card-glow-border::before {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  border-radius: inherit;
-  background: conic-gradient(from 0deg, #a78bfa, #22d3ee, #fb7185, #f59e0b, #a78bfa);
-  z-index: -1;
-  opacity: 0;
-  transition: opacity 0.4s ease;
-  animation: spin 3s linear infinite;
-}
-.card-glow-border:hover::before {
-  opacity: 1;
-}
-.card-glow-border.expanded::before {
-  opacity: 0;
-}
-
-/* V3: Staggered scale entrance with tilt */
-.reveal-scale-tilt {
-  opacity: 0;
-  transform: scale(0.92) rotate(-1.5deg);
-  transition: opacity 0.6s ease, transform 0.6s ease;
-}
-.reveal-scale-tilt:nth-child(even) {
-  transform: scale(0.92) rotate(1.5deg);
-}
-.reveal-scale-tilt.visible {
-  opacity: 1;
-  transform: scale(1) rotate(0deg);
-}
 
 /* V4: Link bar slide-fill on hover */
 .link-bar-fill {
@@ -404,6 +331,68 @@ body {
   transform: translateY(2px);
 }
 
+/* ===== V6 BRUTALIST ===== */
+
+/* V6: Clip-path wipe reveal from left */
+.reveal-clip {
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.6s cubic-bezier(0.77, 0, 0.175, 1);
+}
+.reveal-clip.visible {
+  clip-path: inset(0 0 0 0);
+}
+
+/* V6: Harsh drop-shadow on hover */
+.brutalist-shadow {
+  transition: box-shadow 0.15s ease;
+}
+.brutalist-shadow:hover {
+  box-shadow: 6px 6px 0 var(--shadow-color);
+}
+
+/* ===== V7 EDITORIAL ===== */
+
+/* V7: Mask reveal from bottom */
+.reveal-mask {
+  clip-path: inset(100% 0 0 0);
+  transition: clip-path 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.reveal-mask.visible {
+  clip-path: inset(0 0 0 0);
+}
+
+/* V7: Elegant link underline with direction shift */
+.editorial-link {
+  position: relative;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+.editorial-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.editorial-link:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* V7: Image grayscale→color on group hover */
+.editorial-image {
+  filter: grayscale(100%);
+  transition: filter 0.6s ease;
+}
+.group:hover .editorial-image {
+  filter: grayscale(0%);
+}
+
 /* ===== CUSTOM CURSOR ===== */
 
 .custom-cursor-dot,
@@ -449,55 +438,53 @@ body {
   margin-top: -25px;
 }
 
-/* V2 Warm: soft blurred dot */
-.custom-cursor-dot.cursor-warm {
-  width: 10px;
-  height: 10px;
-  margin-left: -5px;
-  margin-top: -5px;
-  border-radius: 50%;
+/* V6 Brutalist: thick bracket cursor */
+.custom-cursor-dot.cursor-brutalist {
+  width: 2px;
+  height: 20px;
+  margin-left: -1px;
+  margin-top: -10px;
   background: var(--cursor-color);
-  filter: blur(1px);
-  opacity: 0.8;
-  transition: width 0.3s, height 0.3s, margin 0.3s, filter 0.3s;
+  border-radius: 0;
+  transition: height 0.15s, margin 0.15s;
 }
-.custom-cursor-ring.cursor-warm {
-  display: none;
-}
-.custom-cursor-dot.cursor-warm.cursor-hover {
-  width: 18px;
-  height: 18px;
-  margin-left: -9px;
-  margin-top: -9px;
-  filter: blur(3px);
-}
-
-/* V3 Cards: dot + ring morphs to square */
-.custom-cursor-dot.cursor-cards {
-  width: 6px;
-  height: 6px;
-  margin-left: -3px;
-  margin-top: -3px;
-  border-radius: 50%;
-  background: var(--cursor-color);
+.custom-cursor-ring.cursor-brutalist {
+  width: 20px;
+  height: 24px;
+  margin-left: -10px;
+  margin-top: -12px;
+  border: 2px solid var(--cursor-color);
+  border-radius: 0;
+  opacity: 0.7;
   transition: width 0.2s, height 0.2s, margin 0.2s;
 }
-.custom-cursor-ring.cursor-cards {
-  width: 36px;
-  height: 36px;
-  margin-left: -18px;
-  margin-top: -18px;
-  border-radius: 50%;
-  border: 1.5px solid var(--cursor-color);
-  opacity: 0.4;
-  transition: width 0.3s, height 0.3s, margin 0.3s, border-radius 0.3s;
+.custom-cursor-ring.cursor-brutalist.cursor-hover {
+  width: 32px;
+  height: 28px;
+  margin-left: -16px;
+  margin-top: -14px;
 }
-.custom-cursor-ring.cursor-cards.cursor-hover {
-  border-radius: 4px;
-  width: 44px;
-  height: 44px;
-  margin-left: -22px;
-  margin-top: -22px;
+
+/* V7 Editorial: small circle → mix-blend-mode on hover */
+.custom-cursor-dot.cursor-editorial {
+  width: 8px;
+  height: 8px;
+  margin-left: -4px;
+  margin-top: -4px;
+  border-radius: 50%;
+  background: var(--cursor-color);
+  transition: width 0.3s, height 0.3s, margin 0.3s, background 0.3s;
+}
+.custom-cursor-ring.cursor-editorial {
+  display: none;
+}
+.custom-cursor-dot.cursor-editorial.cursor-hover {
+  width: 40px;
+  height: 40px;
+  margin-left: -20px;
+  margin-top: -20px;
+  background: white;
+  mix-blend-mode: difference;
 }
 
 /* V4 Terminal: blinking block cursor */

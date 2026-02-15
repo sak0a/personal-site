@@ -1,6 +1,6 @@
 import { onMounted, onUnmounted, nextTick } from 'vue'
 
-export function useScrollReveal(containerRef, selector = '.reveal, .reveal-left, .reveal-scale, .reveal-slow, .reveal-scale-tilt, .separator-draw, .underline-grow, .divider-draw, .v5-heading-line', options = {}) {
+export function useScrollReveal(containerRef, selector = '.reveal, .reveal-left, .reveal-scale, .reveal-slow, .divider-draw, .v5-heading-line, .reveal-clip, .reveal-mask', options = {}) {
   let observer = null
 
   const defaults = {

@@ -12,20 +12,20 @@ const router = createRouter({
       component: () => import('../views/Version1.vue'),
     },
     {
-      path: '/2',
-      component: () => import('../views/Version2.vue'),
-    },
-    {
-      path: '/3',
-      component: () => import('../views/Version3.vue'),
-    },
-    {
       path: '/4',
       component: () => import('../views/Version4.vue'),
     },
     {
       path: '/5',
       component: () => import('../views/Version5.vue'),
+    },
+    {
+      path: '/6',
+      component: () => import('../views/Version6.vue'),
+    },
+    {
+      path: '/7',
+      component: () => import('../views/Version7.vue'),
     },
   ],
   scrollBehavior() {

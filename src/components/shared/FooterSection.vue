@@ -14,7 +14,7 @@ const year = new Date().getFullYear()
 </script>
 
 <template>
-  <footer class="py-12 px-6 border-t" :class="variant === 'rose' ? 'border-transparent' : 'border-zinc-900'">
+  <footer class="py-12 px-6 border-t" :class="variant === 'rose' || variant === 'editorial' ? 'border-transparent' : variant === 'brutalist' ? 'border-zinc-700' : 'border-zinc-900'">
     <!-- V1 Neon: terminal shell prompt -->
     <div v-if="variant === 'neon'" class="font-mono text-sm text-zinc-600">
       <span class="text-zinc-500">$ </span>
@@ -25,21 +25,22 @@ const year = new Date().getFullYear()
       <span class="cursor-blink text-accent-cyan ml-0.5">|</span>
     </div>
 
-    <!-- V2 Warm: centered with pulsing dot -->
-    <p v-else-if="variant === 'warm'" class="text-sm text-zinc-600 text-center">
-      {{ year }}
-      <span class="inline-block mx-3 w-1.5 h-1.5 rounded-full animate-pulse" :style="{ backgroundColor: accentColor }" />
-      <span class="font-bold" :style="{ color: accentColor }">saka</span>
-    </p>
+    <!-- V6 Brutalist: raw monospace with exposed pipe characters -->
+    <div v-else-if="variant === 'brutalist'" class="font-mono text-sm text-zinc-600 uppercase tracking-widest">
+      <span class="font-bold" :style="{ color: accentColor }">SAKA</span>
+      <span class="mx-3 text-zinc-700">|</span>
+      <span>{{ year }}</span>
+      <span class="mx-3 text-zinc-700">|</span>
+      <span>BUILT</span>
+    </div>
 
-    <!-- V3 Violet: card-style box -->
-    <div v-else-if="variant === 'violet'" class="inline-block border border-zinc-800 rounded-lg px-6 py-3">
-      <div class="h-0.5 w-12 rounded-full mb-3 bg-gradient-to-r from-accent-violet to-accent-cyan" />
-      <p class="text-sm text-zinc-500">
-        <span class="font-bold" :style="{ color: accentColor }">saka</span>
-        <span class="mx-2 text-zinc-700">/</span>
-        <span>{{ year }}</span>
+    <!-- V7 Editorial: elegant centered with thin rules -->
+    <div v-else-if="variant === 'editorial'" class="text-center">
+      <div class="w-16 h-px mx-auto mb-4" :style="{ backgroundColor: accentColor + '40' }" />
+      <p class="text-sm text-zinc-500 tracking-widest font-serif italic">
+        &mdash; saka, {{ year }} &mdash;
       </p>
+      <div class="w-16 h-px mx-auto mt-4" :style="{ backgroundColor: accentColor + '40' }" />
     </div>
 
     <!-- V4 Terminal: mono prompt with blinking underscore -->

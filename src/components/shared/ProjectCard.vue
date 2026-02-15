@@ -7,7 +7,7 @@ const props = defineProps({
   variant: {
     type: String,
     default: 'timeline',
-    validator: (v) => ['timeline', 'card', 'minimal', 'horizontal', 'large-type'].includes(v),
+    validator: (v) => ['timeline', 'horizontal', 'large-type', 'brutalist', 'editorial'].includes(v),
   },
   accentColor: {
     type: String,
@@ -88,94 +88,6 @@ function getDomain(url) {
                 <span v-for="lang in project.languages" :key="lang" class="text-xs px-2.5 py-0.5 rounded-full" :style="{ backgroundColor: accentColor + '15', color: accentColor }">{{ lang }}</span>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Card variant (Version 3) -->
-  <div
-    v-else-if="variant === 'card'"
-    class="group bg-zinc-900/50 border border-zinc-800 rounded-2xl p-5 transition-all duration-300 cursor-pointer"
-    :style="{ borderColor: expanded ? accentColor + '60' : '' }"
-    @click="emit('toggle')"
-    @mouseenter="!expanded && ($event.currentTarget.style.borderColor = accentColor + '80')"
-    @mouseleave="!expanded && ($event.currentTarget.style.borderColor = '')"
-  >
-    <div class="relative">
-      <img
-        :src="project.image"
-        :alt="project.name"
-        class="w-full object-cover rounded-xl mb-4 opacity-80 group-hover:opacity-100 transition-all duration-300"
-        :class="expanded ? 'h-56' : 'h-40'"
-      />
-      <svg class="absolute top-2 right-2 w-5 h-5 text-zinc-400 transition-transform duration-300 bg-black/60 rounded-full p-1" :class="{ 'rotate-180': expanded }" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" :d="iconPaths.chevron" />
-      </svg>
-    </div>
-    <span class="text-xs text-zinc-600 font-mono">{{ project.year }}</span>
-    <h3 class="text-lg font-bold mt-1 mb-2" :style="{ color: accentColor }">{{ project.name }}</h3>
-    <p class="text-sm text-zinc-400 leading-relaxed mb-3">{{ project.description }}</p>
-    <div class="flex flex-wrap gap-1.5">
-      <span v-for="tag in project.tags" :key="tag" class="text-xs px-2 py-0.5 rounded-full transition-transform duration-200 group-hover:-translate-y-0.5" :style="{ backgroundColor: accentColor + '15', color: accentColor }">{{ tag }}</span>
-    </div>
-
-    <!-- Expandable details -->
-    <div class="grid transition-[grid-template-rows] duration-300 ease-out" :style="{ gridTemplateRows: expanded ? '1fr' : '0fr' }">
-      <div class="overflow-hidden">
-        <div class="pt-3 transition-opacity duration-200" :class="expanded ? 'opacity-100 delay-150' : 'opacity-0'">
-          <div class="flex items-center gap-4 mb-3">
-            <a v-if="project.url" :href="project.url" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-sm text-zinc-500 transition-colors" @click.stop @mouseenter="$event.currentTarget.style.color = accentColor" @mouseleave="$event.currentTarget.style.color = ''">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" :d="iconPaths.external" /></svg>
-              {{ getDomain(project.url) }}
-            </a>
-            <a v-if="project.github" :href="project.github" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-sm text-zinc-500 transition-colors" @click.stop @mouseenter="$event.currentTarget.style.color = accentColor" @mouseleave="$event.currentTarget.style.color = ''">
-              <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path :d="iconPaths.github" /></svg>
-              Source
-            </a>
-          </div>
-          <div class="flex flex-wrap gap-1.5">
-            <span v-for="lang in project.languages" :key="lang" class="text-xs px-2.5 py-0.5 rounded-full" :style="{ backgroundColor: accentColor + '15', color: accentColor }">{{ lang }}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Minimal variant (Version 2 - centered stacked) -->
-  <div v-else-if="variant === 'minimal'" class="text-center group cursor-pointer" @click="emit('toggle')">
-    <img
-      :src="project.image"
-      :alt="project.name"
-      class="w-full max-w-md mx-auto h-48 object-cover rounded-xl mb-4 opacity-80 group-hover:opacity-100 transition-all duration-300 image-glow-hover"
-      :style="{ '--glow-color': accentColor + '40' }"
-    />
-    <span class="text-xs text-zinc-600 font-mono">{{ project.year }}</span>
-    <h3 class="text-2xl font-bold mt-1 mb-2">{{ project.name }}</h3>
-    <p class="text-sm text-zinc-400 leading-relaxed max-w-lg mx-auto">{{ project.description }}</p>
-
-    <!-- Chevron -->
-    <svg class="w-4 h-4 mx-auto mt-3 text-zinc-600 transition-transform duration-300" :class="{ 'rotate-180': expanded }" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" :d="iconPaths.chevron" />
-    </svg>
-
-    <!-- Expandable details (centered) -->
-    <div class="grid transition-[grid-template-rows] duration-300 ease-out" :style="{ gridTemplateRows: expanded ? '1fr' : '0fr' }">
-      <div class="overflow-hidden">
-        <div class="pt-4 transition-opacity duration-200" :class="expanded ? 'opacity-100 delay-150' : 'opacity-0'">
-          <div class="flex items-center justify-center gap-4 mb-3">
-            <a v-if="project.url" :href="project.url" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-sm text-zinc-500 transition-colors" @click.stop @mouseenter="$event.currentTarget.style.color = accentColor" @mouseleave="$event.currentTarget.style.color = ''">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" :d="iconPaths.external" /></svg>
-              {{ getDomain(project.url) }}
-            </a>
-            <a v-if="project.github" :href="project.github" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-sm text-zinc-500 transition-colors" @click.stop @mouseenter="$event.currentTarget.style.color = accentColor" @mouseleave="$event.currentTarget.style.color = ''">
-              <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path :d="iconPaths.github" /></svg>
-              Source
-            </a>
-          </div>
-          <div class="flex flex-wrap justify-center gap-1.5">
-            <span v-for="lang in project.languages" :key="lang" class="text-xs px-2.5 py-0.5 rounded-full" :style="{ backgroundColor: accentColor + '15', color: accentColor }">{{ lang }}</span>
           </div>
         </div>
       </div>
@@ -302,6 +214,117 @@ function getDomain(url) {
               :style="{ backgroundColor: accentColor + '15', color: accentColor, '--tag-color': accentColor + '30' }"
             >{{ lang }}</span>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Brutalist variant (Version 6) -->
+  <div
+    v-else-if="variant === 'brutalist'"
+    class="border-t-4 border-b border-zinc-700 py-6 group cursor-pointer transition-colors duration-150"
+    :style="{ borderTopColor: accentColor }"
+    @click="emit('toggle')"
+    @mouseenter="$event.currentTarget.style.backgroundColor = accentColor + '08'"
+    @mouseleave="$event.currentTarget.style.backgroundColor = ''"
+  >
+    <div class="flex items-center justify-between mb-3">
+      <span class="font-mono text-xs text-zinc-600 uppercase tracking-widest">{{ project.year }}</span>
+      <svg class="w-4 h-4 text-zinc-600 transition-transform duration-200" :class="{ 'rotate-180': expanded }" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" :d="iconPaths.chevron" />
+      </svg>
+    </div>
+    <h3
+      class="font-mono text-xl md:text-2xl font-bold uppercase tracking-wide mb-2 transition-all duration-150"
+      :style="expanded ? { color: accentColor } : {}"
+      @mouseenter="$event.target.style.color = accentColor; $event.target.style.textShadow = `4px 4px 0 ${accentColor}20`"
+      @mouseleave="!expanded && ($event.target.style.color = ''); $event.target.style.textShadow = ''"
+    >{{ project.name }}</h3>
+    <p class="text-sm text-zinc-500 leading-relaxed font-mono">{{ project.description }}</p>
+
+    <!-- Expandable details -->
+    <div class="grid transition-[grid-template-rows] duration-300 ease-out" :style="{ gridTemplateRows: expanded ? '1fr' : '0fr' }">
+      <div class="overflow-hidden">
+        <div class="pt-4 transition-opacity duration-200" :class="expanded ? 'opacity-100 delay-150' : 'opacity-0'">
+          <img
+            :src="project.image"
+            :alt="project.name"
+            class="w-full max-w-md h-48 object-cover rounded-none mb-4 opacity-90"
+          />
+          <div class="flex items-center gap-4 mb-3">
+            <a v-if="project.url" :href="project.url" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-sm font-mono text-zinc-500 uppercase transition-colors" @click.stop @mouseenter="$event.currentTarget.style.color = accentColor" @mouseleave="$event.currentTarget.style.color = ''">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" :d="iconPaths.external" /></svg>
+              {{ getDomain(project.url) }}
+            </a>
+            <a v-if="project.github" :href="project.github" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-sm font-mono text-zinc-500 uppercase transition-colors" @click.stop @mouseenter="$event.currentTarget.style.color = accentColor" @mouseleave="$event.currentTarget.style.color = ''">
+              <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path :d="iconPaths.github" /></svg>
+              Source
+            </a>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <span
+              v-for="lang in project.languages"
+              :key="lang"
+              class="text-xs font-mono px-2.5 py-1 border rounded-none uppercase tracking-wider transition-colors duration-150"
+              :style="{ borderColor: accentColor + '40', color: accentColor }"
+              @mouseenter="$event.target.style.backgroundColor = accentColor + '15'"
+              @mouseleave="$event.target.style.backgroundColor = ''"
+            >{{ lang }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Editorial variant (Version 7) -->
+  <div
+    v-else-if="variant === 'editorial'"
+    class="py-12 group cursor-pointer"
+    @click="emit('toggle')"
+  >
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+      <!-- Image column -->
+      <div :class="project.id % 2 === 0 ? 'md:order-2' : ''">
+        <img
+          :src="project.image"
+          :alt="project.name"
+          class="w-full h-56 object-cover rounded-sm editorial-image"
+        />
+      </div>
+      <!-- Text column -->
+      <div :class="project.id % 2 === 0 ? 'md:order-1' : ''">
+        <span class="text-xs text-zinc-600 uppercase tracking-[0.2em]">{{ project.year }}</span>
+        <h3
+          class="font-serif text-2xl md:text-3xl font-bold mt-2 mb-3 transition-colors duration-300"
+          :style="expanded ? { color: accentColor } : {}"
+          @mouseenter="$event.target.style.color = accentColor"
+          @mouseleave="!expanded && ($event.target.style.color = '')"
+        >{{ project.name }}</h3>
+        <p class="text-zinc-400 leading-relaxed text-[15px]">{{ project.description }}</p>
+        <div class="mt-3 flex items-center gap-2 text-sm text-zinc-600">
+          <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="{ 'rotate-180': expanded }" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" :d="iconPaths.chevron" />
+          </svg>
+          <span class="text-xs uppercase tracking-widest">{{ expanded ? 'Less' : 'More' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Expandable details -->
+    <div class="grid transition-[grid-template-rows] duration-300 ease-out" :style="{ gridTemplateRows: expanded ? '1fr' : '0fr' }">
+      <div class="overflow-hidden">
+        <div class="pt-6 transition-opacity duration-200" :class="expanded ? 'opacity-100 delay-150' : 'opacity-0'">
+          <div class="flex items-center gap-6 mb-4">
+            <a v-if="project.url" :href="project.url" target="_blank" rel="noopener noreferrer" class="editorial-link text-sm text-zinc-500 transition-colors" :style="{ '--accent': accentColor }" @click.stop @mouseenter="$event.currentTarget.style.color = accentColor" @mouseleave="$event.currentTarget.style.color = ''">
+              <svg class="w-3.5 h-3.5 inline mr-1.5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" :d="iconPaths.external" /></svg>{{ getDomain(project.url) }}
+            </a>
+            <a v-if="project.github" :href="project.github" target="_blank" rel="noopener noreferrer" class="editorial-link text-sm text-zinc-500 transition-colors" :style="{ '--accent': accentColor }" @click.stop @mouseenter="$event.currentTarget.style.color = accentColor" @mouseleave="$event.currentTarget.style.color = ''">
+              <svg class="w-3.5 h-3.5 inline mr-1.5" fill="currentColor" viewBox="0 0 24 24"><path :d="iconPaths.github" /></svg>Source
+            </a>
+          </div>
+          <p class="text-sm text-zinc-500 italic">
+            <span v-for="(lang, li) in project.languages" :key="lang">{{ lang }}<span v-if="li < project.languages.length - 1">, </span></span>
+          </p>
         </div>
       </div>
     </div>

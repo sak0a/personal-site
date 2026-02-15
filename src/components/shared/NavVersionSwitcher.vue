@@ -6,13 +6,13 @@ const route = useRoute()
 
 const versions = [
   { path: '/1', label: '1', color: 'bg-accent-cyan', hex: '#22d3ee' },
-  { path: '/2', label: '2', color: 'bg-accent-amber', hex: '#f59e0b' },
-  { path: '/3', label: '3', color: 'bg-accent-violet', hex: '#a78bfa' },
   { path: '/4', label: '4', color: 'bg-accent-emerald', hex: '#34d399' },
   { path: '/5', label: '5', color: 'bg-accent-rose', hex: '#fb7185' },
+  { path: '/6', label: '6', color: 'bg-accent-sky', hex: '#38bdf8' },
+  { path: '/7', label: '7', color: 'bg-accent-gold', hex: '#eab308' },
 ]
 
-const isVersionPage = computed(() => /^\/[1-5]$/.test(route.path))
+const isVersionPage = computed(() => /^\/(1|4|5|6|7)$/.test(route.path))
 </script>
 
 <template>
