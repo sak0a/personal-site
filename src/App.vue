@@ -1,14 +1,9 @@
 <script setup>
-import NavVersionSwitcher from './components/shared/NavVersionSwitcher.vue'
+import Version5 from './views/Version5.vue'
 </script>
 
 <template>
   <div class="min-h-screen bg-black text-white">
-    <NavVersionSwitcher />
-    <RouterView v-slot="{ Component }">
-      <Transition name="page-fade" mode="out-in">
-        <component :is="Component" />
-      </Transition>
-    </RouterView>
+    <Version5 />
   </div>
 </template>
