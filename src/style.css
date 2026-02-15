@@ -392,68 +392,6 @@ body {
   transform: translateY(2px);
 }
 
-/* ===== V6 BRUTALIST ===== */
-
-/* V6: Clip-path wipe reveal from left */
-.reveal-clip {
-  clip-path: inset(0 100% 0 0);
-  transition: clip-path 0.6s cubic-bezier(0.77, 0, 0.175, 1);
-}
-.reveal-clip.visible {
-  clip-path: inset(0 0 0 0);
-}
-
-/* V6: Harsh drop-shadow on hover */
-.brutalist-shadow {
-  transition: box-shadow 0.15s ease;
-}
-.brutalist-shadow:hover {
-  box-shadow: 6px 6px 0 var(--shadow-color);
-}
-
-/* ===== V7 EDITORIAL ===== */
-
-/* V7: Mask reveal from bottom */
-.reveal-mask {
-  clip-path: inset(100% 0 0 0);
-  transition: clip-path 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-.reveal-mask.visible {
-  clip-path: inset(0 0 0 0);
-}
-
-/* V7: Elegant link underline with direction shift */
-.editorial-link {
-  position: relative;
-  text-decoration: none;
-  transition: color 0.3s ease;
-}
-.editorial-link::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 100%;
-  height: 1px;
-  background: var(--accent);
-  transform: scaleX(0);
-  transform-origin: right;
-  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-.editorial-link:hover::after {
-  transform: scaleX(1);
-  transform-origin: left;
-}
-
-/* V7: Image grayscale→color on group hover */
-.editorial-image {
-  filter: grayscale(100%);
-  transition: filter 0.6s ease;
-}
-.group:hover .editorial-image {
-  filter: grayscale(0%);
-}
-
 /* ===== CUSTOM CURSOR ===== */
 
 .custom-cursor-dot,
@@ -497,55 +435,6 @@ body {
   height: 50px;
   margin-left: -25px;
   margin-top: -25px;
-}
-
-/* V6 Brutalist: thick bracket cursor */
-.custom-cursor-dot.cursor-brutalist {
-  width: 2px;
-  height: 20px;
-  margin-left: -1px;
-  margin-top: -10px;
-  background: var(--cursor-color);
-  border-radius: 0;
-  transition: height 0.15s, margin 0.15s;
-}
-.custom-cursor-ring.cursor-brutalist {
-  width: 20px;
-  height: 24px;
-  margin-left: -10px;
-  margin-top: -12px;
-  border: 2px solid var(--cursor-color);
-  border-radius: 0;
-  opacity: 0.7;
-  transition: width 0.2s, height 0.2s, margin 0.2s;
-}
-.custom-cursor-ring.cursor-brutalist.cursor-hover {
-  width: 32px;
-  height: 28px;
-  margin-left: -16px;
-  margin-top: -14px;
-}
-
-/* V7 Editorial: small circle → mix-blend-mode on hover */
-.custom-cursor-dot.cursor-editorial {
-  width: 8px;
-  height: 8px;
-  margin-left: -4px;
-  margin-top: -4px;
-  border-radius: 50%;
-  background: var(--cursor-color);
-  transition: width 0.3s, height 0.3s, margin 0.3s, background 0.3s;
-}
-.custom-cursor-ring.cursor-editorial {
-  display: none;
-}
-.custom-cursor-dot.cursor-editorial.cursor-hover {
-  width: 40px;
-  height: 40px;
-  margin-left: -20px;
-  margin-top: -20px;
-  background: white;
-  mix-blend-mode: difference;
 }
 
 /* V4 Terminal: blinking block cursor */

@@ -23,14 +23,6 @@ const router = createRouter({
       path: '/55',
       component: () => import('../views/Version55.vue'),
     },
-    {
-      path: '/6',
-      component: () => import('../views/Version6.vue'),
-    },
-    {
-      path: '/7',
-      component: () => import('../views/Version7.vue'),
-    },
   ],
   scrollBehavior() {
     return { top: 0 }

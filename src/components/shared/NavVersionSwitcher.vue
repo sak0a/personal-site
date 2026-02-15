@@ -9,11 +9,9 @@ const versions = [
   { path: '/4', label: '4', color: 'bg-accent-emerald', hex: '#34d399' },
   { path: '/5', label: '5', color: 'bg-accent-rose', hex: '#fb7185' },
   { path: '/55', label: '55', color: 'bg-accent-rose', hex: '#fb7185' },
-  { path: '/6', label: '6', color: 'bg-accent-sky', hex: '#38bdf8' },
-  { path: '/7', label: '7', color: 'bg-accent-gold', hex: '#eab308' },
 ]
 
-const isVersionPage = computed(() => /^\/(1|4|5|6|7)$/.test(route.path))
+const isVersionPage = computed(() => /^\/(1|4|5|55)$/.test(route.path))
 </script>
 
 <template>

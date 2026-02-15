@@ -10,8 +10,6 @@ const versions = [
   { path: '/4', label: '04', name: 'Terminal', color: 'border-accent-emerald', glow: 'hover:shadow-[0_0_30px_rgba(52,211,153,0.15)]', text: 'text-accent-emerald', hex: '#34d399' },
   { path: '/5', label: '05', name: 'Minimal', color: 'border-accent-rose', glow: 'hover:shadow-[0_0_30px_rgba(251,113,133,0.15)]', text: 'text-accent-rose', hex: '#fb7185' },
   { path: '/55', label: '55', name: 'Minimal-Full', color: 'border-accent-rose', glow: 'hover:shadow-[0_0_30px_rgba(251,113,133,0.15)]', text: 'text-accent-rose', hex: '#fb7185' },
-  { path: '/6', label: '06', name: 'Brutalist', color: 'border-accent-sky', glow: 'hover:shadow-[0_0_30px_rgba(56,189,248,0.15)]', text: 'text-accent-sky', hex: '#38bdf8' },
-  { path: '/7', label: '07', name: 'Editorial', color: 'border-accent-gold', glow: 'hover:shadow-[0_0_30px_rgba(234,179,8,0.15)]', text: 'text-accent-gold', hex: '#eab308' },
 ]
 </script>
 
@@ -22,7 +20,7 @@ const versions = [
       <p class="text-zinc-500 text-lg">choose a vibe</p>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 w-full max-w-5xl">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full max-w-4xl">
       <RouterLink
         v-for="(v, i) in versions"
         :key="v.path"
