@@ -1,11 +1,12 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useScrollReveal } from '../composables/useScrollReveal'
 import { useMagnetic } from '../composables/useMagnetic'
 import { useCustomCursor } from '../composables/useCustomCursor'
 import ProjectCard from '../components/shared/ProjectCard.vue'
 import GitHubHeatmap from '../components/shared/GitHubHeatmap.vue'
 import FooterSection from '../components/shared/FooterSection.vue'
+import TextEffect from '../components/shared/TextEffect.vue'
 import { projects } from '../data/projects'
 import { links } from '../data/links'
 import { stack } from '../data/stack'
@@ -14,7 +15,10 @@ const accent = '#fb7185'
 const container = ref(null)
 const expandedId = ref(null)
 const heroReady = ref(false)
+const subtitleDone = ref(false)
 const dividerEls = ref([])
+const projectEls = ref([])
+const projectVisible = ref({})
 useScrollReveal(container)
 const { onMove: magneticMove, onLeave: magneticLeave } = useMagnetic(8)
 useCustomCursor({ variant: 'rose', color: accent })
@@ -24,6 +28,37 @@ const heroChars = ['s', 'a', 'k', 'a']
 function toggleProject(id) {
   expandedId.value = expandedId.value === id ? null : id
 }
+
+// Layout toggle — defaults to wide, persisted in localStorage
+const STORAGE_KEY = 'v5-layout-wide'
+const wideLayout = ref(true)
+
+if (typeof window !== 'undefined') {
+  const stored = localStorage.getItem(STORAGE_KEY)
+  if (stored !== null) wideLayout.value = stored === 'true'
+}
+
+watch(wideLayout, (val) => {
+  localStorage.setItem(STORAGE_KEY, String(val))
+})
+
+function toggleLayout() {
+  wideLayout.value = !wideLayout.value
+}
+
+const containerClass = computed(() => [
+  'mx-auto v5-layout-transition',
+  wideLayout.value ? 'max-w-6xl px-6 lg:px-8' : 'max-w-2xl px-6',
+])
+
+const footerContainerClass = computed(() => [
+  'mx-auto v5-layout-transition',
+  wideLayout.value ? 'max-w-6xl px-6 lg:px-8' : 'max-w-3xl px-6',
+])
+
+const projectGridClass = computed(() =>
+  wideLayout.value ? 'grid grid-cols-1 lg:grid-cols-2 gap-x-10 gap-y-2' : '',
+)
 
 // Marquee — JS-driven for smooth speed transitions on hover
 const marqueeEl = ref(null)
@@ -52,6 +87,8 @@ function tickMarquee() {
 
 // Divider replay observer — toggles .visible on/off each time
 let dividerObserver = null
+// Project card scroll-triggered visibility
+let projectObserver = null
 
 onMounted(() => {
   setTimeout(() => { heroReady.value = true }, 100)
@@ -73,82 +110,154 @@ onMounted(() => {
     { threshold: 0.3 }
   )
 
-  // Observe all dividers after DOM settles
+  // Set up project card observer — staggered reveals on scroll
+  projectObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const idx = Number(entry.target.dataset.projectIdx)
+          // Stagger: each card waits 150ms after the previous visible sibling
+          const alreadyVisible = Object.keys(projectVisible.value).length
+          const delay = alreadyVisible > 0 ? 150 : 0
+          setTimeout(() => {
+            projectVisible.value = { ...projectVisible.value, [idx]: true }
+          }, delay)
+          projectObserver.unobserve(entry.target)
+        }
+      })
+    },
+    { threshold: 0.1, rootMargin: '0px 0px -60px 0px' }
+  )
+
+  // Observe projects + dividers after DOM settles
   setTimeout(() => {
-    dividerEls.value.forEach((el) => {
-      if (el) dividerObserver.observe(el)
+    projectEls.value.forEach((el) => {
+      if (el) projectObserver.observe(el)
     })
+    if (!wideLayout.value) {
+      dividerEls.value.forEach((el) => {
+        if (el) dividerObserver.observe(el)
+      })
+    }
   }, 100)
 })
 
+// Re-observe dividers when switching back to compact mode
+watch(wideLayout, async (wide) => {
+  await nextTick()
+  dividerObserver?.disconnect()
+  if (!wide) {
+    dividerEls.value = []
+    await nextTick()
+    dividerEls.value.forEach((el) => {
+      if (el) dividerObserver.observe(el)
+    })
+  }
+}, { flush: 'post' })
+
 onUnmounted(() => {
   dividerObserver?.disconnect()
+  projectObserver?.disconnect()
   if (marqueeRaf) cancelAnimationFrame(marqueeRaf)
 })
 </script>
 
 <template>
   <div>
-  <div ref="container" class="max-w-2xl mx-auto px-6">
+  <div ref="container" :class="containerClass">
     <!-- Hero with char-reveal + magnetic title -->
-    <section class="pt-32 pb-24">
-      <h1
-        class="text-7xl md:text-8xl lg:text-9xl font-black tracking-tighter leading-none mb-6 inline-block"
-        @mousemove="magneticMove"
-        @mouseleave="magneticLeave"
-      >
-        <span class="char-reveal" :class="{ visible: heroReady }">
-          <span
-            v-for="(char, i) in heroChars"
-            :key="i"
-            :style="{ transitionDelay: `${i * 60}ms` }"
-          >{{ char }}</span><span class="text-accent-rose" :style="{ transitionDelay: `${heroChars.length * 60}ms` }">.</span>
-        </span>
-      </h1>
-      <p
-        v-motion
-        :initial="{ opacity: 0, y: 20 }"
-        :enter="{ opacity: 1, y: 0, transition: { delay: 300, duration: 800 } }"
-        class="text-xl text-zinc-500 leading-relaxed"
-      >
-        I'm creating all types of projects for things i'm interested in — specially web projects.
-      </p>
+    <section class="pt-32 pb-24" :class="wideLayout ? 'lg:pb-32' : ''">
+      <div class="inline-block mb-6">
+        <h1
+          class="v5-hero-title font-black tracking-tighter leading-none inline-block relative"
+          :class="[
+            wideLayout ? 'text-8xl md:text-9xl lg:text-[11rem]' : 'text-7xl md:text-8xl lg:text-9xl',
+            { 'v5-hero-ready': heroReady }
+          ]"
+          :style="{ '--accent': accent }"
+          @mousemove="magneticMove"
+          @mouseleave="magneticLeave"
+        >
+          <span class="char-reveal" :class="{ visible: heroReady }">
+            <span
+              v-for="(char, i) in heroChars"
+              :key="i"
+              :style="{ transitionDelay: `${i * 60}ms` }"
+            >{{ char }}</span><span class="text-accent-rose" :style="{ transitionDelay: `${heroChars.length * 60}ms` }">.</span>
+          </span>
+        </h1>
+      </div>
+      <TextEffect
+        text="Software developer from Germany — building full-stack web apps, native tools, and anything that sparks my curiosity."
+        per="char"
+        preset="fade-in-blur"
+        :trigger="heroReady"
+        :delay="0.3"
+        :speed-reveal="1.6"
+        :speed-segment="0.8"
+        class="text-zinc-500 leading-relaxed"
+        :class="wideLayout ? 'text-xl lg:text-2xl max-w-2xl' : 'text-xl'"
+        @animation-complete="subtitleDone = true"
+      />
+      <div class="flex flex-wrap items-center gap-x-2 gap-y-1 mt-4 text-sm text-zinc-600">
+        <TextEffect tag="span" text="full-stack" per="char" preset="blur" :trigger="subtitleDone" :delay="0" :speed-reveal="2" :speed-segment="0.7" class="inline" />
+        <span class="transition-opacity duration-500" :class="subtitleDone ? 'opacity-40' : 'opacity-0'" style="transition-delay:0.15s;color:#fb7185">·</span>
+        <TextEffect tag="span" text="open source" per="char" preset="blur" :trigger="subtitleDone" :delay="0.1" :speed-reveal="2" :speed-segment="0.7" class="inline" />
+        <span class="transition-opacity duration-500" :class="subtitleDone ? 'opacity-40' : 'opacity-0'" style="transition-delay:0.3s;color:#fb7185">·</span>
+        <TextEffect tag="span" text="gaming" per="char" preset="blur" :trigger="subtitleDone" :delay="0.2" :speed-reveal="2" :speed-segment="0.7" class="inline" />
+        <span class="transition-opacity duration-500" :class="subtitleDone ? 'opacity-40' : 'opacity-0'" style="transition-delay:0.45s;color:#fb7185">·</span>
+        <TextEffect tag="span" text="native apps" per="char" preset="blur" :trigger="subtitleDone" :delay="0.3" :speed-reveal="2" :speed-segment="0.7" class="inline" />
+      </div>
     </section>
 
     <!-- Projects -->
     <section class="reveal-slow pb-2">
-      <h2 class="text-2xl font-bold mb-10 v5-heading-line" :style="{ '--accent': accent }">
+      <h2
+        class="font-bold mb-10 v5-heading-line"
+        :class="wideLayout ? 'text-2xl lg:text-3xl' : 'text-2xl'"
+        :style="{ '--accent': accent }"
+      >
         projects
       </h2>
     </section>
 
-    <div>
-      <div
+    <div :class="projectGridClass">
+      <template
         v-for="(project, i) in projects"
         :key="project.id"
-        class="reveal-slow"
-        :style="{ transitionDelay: `${i * 80}ms` }"
       >
-        <ProjectCard
-          :project="project"
-          variant="large-type"
-          :accent-color="accent"
-          :expanded="expandedId === project.id"
-          :stagger-title="true"
-          @toggle="toggleProject(project.id)"
-        />
-        <!-- Divider that replays animation on each scroll -->
         <div
-          v-if="i < projects.length - 1"
+          :ref="el => { if (el) projectEls[i] = el }"
+          :data-project-idx="i"
+          class="transition-all duration-700 ease-out"
+          :class="projectVisible[i] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'"
+        >
+          <ProjectCard
+            :project="project"
+            variant="large-type"
+            :accent-color="accent"
+            :expanded="expandedId === project.id"
+            :stagger-title="true"
+            :visible="!!projectVisible[i]"
+            @toggle="toggleProject(project.id)"
+          />
+        </div>
+        <!-- Divider: compact mode only -->
+        <div
+          v-if="!wideLayout && i < projects.length - 1"
           :ref="el => { if (el) dividerEls[i] = el }"
           class="divider-draw my-2 w-full h-px bg-accent-rose/20 origin-left"
         />
-      </div>
+      </template>
     </div>
 
     <!-- Tech Stack -->
     <section class="reveal-slow pt-20 pb-2">
-      <h2 class="text-2xl font-bold mb-10 v5-heading-line" :style="{ '--accent': accent }">
+      <h2
+        class="font-bold mb-10 v5-heading-line"
+        :class="wideLayout ? 'text-2xl lg:text-3xl' : 'text-2xl'"
+        :style="{ '--accent': accent }"
+      >
         stack
       </h2>
     </section>
@@ -175,7 +284,11 @@ onUnmounted(() => {
 
     <!-- GitHub Activity -->
     <section class="reveal-slow pt-20 pb-2">
-      <h2 class="text-2xl font-bold mb-10 v5-heading-line" :style="{ '--accent': accent }">
+      <h2
+        class="font-bold mb-10 v5-heading-line"
+        :class="wideLayout ? 'text-2xl lg:text-3xl' : 'text-2xl'"
+        :style="{ '--accent': accent }"
+      >
         activity
       </h2>
     </section>
@@ -186,8 +299,8 @@ onUnmounted(() => {
 
   </div>
 
-    <!-- Wider footer area -->
-    <div class="max-w-3xl mx-auto px-6">
+    <!-- Footer area -->
+    <div :class="footerContainerClass">
       <FooterSection :accent-color="accent" variant="rose">
         <template #links>
           <div class="flex flex-wrap items-center gap-x-1 gap-y-2 mb-8">
@@ -209,6 +322,16 @@ onUnmounted(() => {
                 <span class="slash-morph-to absolute inset-0 flex items-center justify-center">~</span>
               </span>
             </template>
+
+            <!-- Layout toggle -->
+            <span class="slash-morph text-accent-rose/40 mx-1 cursor-default">
+              <span class="slash-morph-from">/</span>
+              <span class="slash-morph-to absolute inset-0 flex items-center justify-center">~</span>
+            </span>
+            <button class="v5-link group/toggle" @click.prevent="toggleLayout">
+              <span class="v5-link-text text-zinc-500">{{ wideLayout ? 'compact' : 'wide' }}</span>
+              <span class="v5-link-line" />
+            </button>
           </div>
         </template>
       </FooterSection>

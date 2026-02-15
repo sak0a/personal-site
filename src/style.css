@@ -127,7 +127,30 @@ body {
   transform: translateY(0);
 }
 
-
+/* V5: Hero "I'm" label via ::before — scales with the title font size using em units */
+.v5-hero-title::before {
+  content: "I'm";
+  position: absolute;
+  left: 0.25em;
+  /* Measured via TextMetrics API:
+     - h1 ascender gap (box top → glyph ink top): 0.244 × h1-font-size
+     - "I'm" descent gap (ink bottom → box bottom): 0.04 × h1-font-size
+     Total from h1 top to where ::before box-bottom should sit: 0.284 × h1-font-size.
+     But em inside ::before is relative to its own font-size (0.16 × h1),
+     so we divide: 0.284 / 0.16 = 1.775em in the ::before's context. */
+  font-size: 0.17em;
+  line-height: 1;
+  top: 1.7em;
+  transform: translateY(-100%);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--accent);
+  opacity: 0;
+  transition: opacity 0.5s ease 50ms;
+}
+.v5-hero-title.v5-hero-ready::before {
+  opacity: 1;
+}
 
 /* V4: Link bar slide-fill on hover */
 .link-bar-fill {
@@ -289,6 +312,11 @@ body {
 .v5-stack-item:hover > div {
   box-shadow: 0 0 20px var(--accent, #fb7185)10, 0 0 4px var(--accent, #fb7185)08;
   background-color: rgba(255, 255, 255, 0.02);
+}
+
+/* V5: Layout toggle transition */
+.v5-layout-transition {
+  transition: max-width 0.5s ease-out, padding 0.3s ease-out;
 }
 
 /* V5: Infinite stack marquee */

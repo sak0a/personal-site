@@ -1,4 +1,6 @@
 <script setup>
+import TextEffect from './TextEffect.vue'
+
 const props = defineProps({
   project: {
     type: Object,
@@ -20,6 +22,10 @@ const props = defineProps({
   staggerTitle: {
     type: Boolean,
     default: false,
+  },
+  visible: {
+    type: Boolean,
+    default: true,
   },
 })
 
@@ -218,7 +224,16 @@ const isIcon = props.project.imageType === 'icon'
     >
       {{ project.name }}
     </h3>
-    <p class="text-zinc-400 leading-relaxed transition-colors duration-300 group-hover:text-zinc-300">{{ project.description }}</p>
+    <TextEffect
+      :text="project.description"
+      per="word"
+      preset="blur"
+      :trigger="visible"
+      :delay="0.15"
+      :speed-reveal="1.8"
+      :speed-segment="0.6"
+      class="text-zinc-400 leading-relaxed transition-colors duration-300 group-hover:text-zinc-300"
+    />
 
     <!-- Expandable details -->
     <div class="grid transition-[grid-template-rows] duration-300 ease-out" :style="{ gridTemplateRows: expanded ? '1fr' : '0fr' }">

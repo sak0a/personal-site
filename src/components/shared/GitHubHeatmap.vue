@@ -1,11 +1,15 @@
 <script setup>
-import { ref, onMounted, onUnmounted, computed, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, computed, nextTick, watch } from 'vue'
 import AnimatedNumber from './AnimatedNumber.vue'
 
 const props = defineProps({
   username: { type: String, required: true },
   accentColor: { type: String, default: '#fb7185' },
 })
+
+// Responsive cell sizing — measure container and compute cell size to fill it
+const containerWidth = ref(0)
+let resizeObserverInstance = null
 
 const contributions = ref([])
 const totalCount = ref(0)
@@ -87,6 +91,23 @@ const weeks = computed(() => {
   return cols
 })
 
+// Dynamic cell sizing based on container width
+const cellStep = computed(() => {
+  if (!weeks.value.length || !containerWidth.value) return 14
+  // step = cellSize + gap; we want weeks * step to fill the container
+  return Math.max(14, Math.floor(containerWidth.value / weeks.value.length))
+})
+
+const cellSize = computed(() => {
+  // Leave a 3px gap minimum between cells
+  return Math.max(11, cellStep.value - 3)
+})
+
+const cellRadius = computed(() => Math.max(2, Math.round(cellSize.value * 0.18)))
+
+const svgWidth = computed(() => weeks.value.length * cellStep.value + 2)
+const svgHeight = computed(() => 7 * cellStep.value + 20)
+
 // Month labels positioned above the grid
 const monthLabels = computed(() => {
   if (!weeks.value.length) return []
@@ -103,7 +124,7 @@ const monthLabels = computed(() => {
       lastMonth = month
       labels.push({
         text: d.toLocaleString('en', { month: 'short' }),
-        x: wi * 14,
+        x: wi * cellStep.value,
       })
     }
   })
@@ -139,12 +160,25 @@ onMounted(async () => {
 
     // Start IntersectionObserver to trigger count animation on scroll into view
     setupScrollTrigger()
+
+    // Measure container and watch for resizes
+    measureContainer()
+    if (scrollContainer.value) {
+      resizeObserverInstance = new ResizeObserver(() => measureContainer())
+      resizeObserverInstance.observe(scrollContainer.value)
+    }
   } catch {
     error.value = true
   } finally {
     loading.value = false
   }
 })
+
+function measureContainer() {
+  if (scrollContainer.value) {
+    containerWidth.value = scrollContainer.value.clientWidth
+  }
+}
 
 // Trigger animated count only when the section scrolls into view
 function setupScrollTrigger() {
@@ -167,6 +201,10 @@ onUnmounted(() => {
   if (observer) {
     observer.disconnect()
     observer = null
+  }
+  if (resizeObserverInstance) {
+    resizeObserverInstance.disconnect()
+    resizeObserverInstance = null
   }
 })
 
@@ -223,8 +261,8 @@ function formatDate(dateStr) {
         <!-- Scrollable SVG container -->
         <div ref="scrollContainer" class="overflow-x-auto pb-2 heatmap-scroll">
           <svg
-            :width="weeks.length * 14 + 2"
-            :height="7 * 14 + 20"
+            :width="svgWidth"
+            :height="svgHeight"
             class="block"
           >
             <!-- Month labels -->
@@ -243,11 +281,11 @@ function formatDate(dateStr) {
                 <rect
                   v-for="day in week"
                   :key="day.date"
-                  :x="wi * 14"
-                  :y="new Date(day.date).getDay() * 14"
-                  width="11"
-                  height="11"
-                  rx="2"
+                  :x="wi * cellStep"
+                  :y="new Date(day.date).getDay() * cellStep"
+                  :width="cellSize"
+                  :height="cellSize"
+                  :rx="cellRadius"
                   :fill="levels[day.level]"
                   :stroke="day.level === 0 ? accentColor + '10' : 'none'"
                   stroke-width="1"
