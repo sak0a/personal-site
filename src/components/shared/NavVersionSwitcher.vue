@@ -8,6 +8,7 @@ const versions = [
   { path: '/1', label: '1', color: 'bg-accent-cyan', hex: '#22d3ee' },
   { path: '/4', label: '4', color: 'bg-accent-emerald', hex: '#34d399' },
   { path: '/5', label: '5', color: 'bg-accent-rose', hex: '#fb7185' },
+  { path: '/55', label: '55', color: 'bg-accent-rose', hex: '#fb7185' },
   { path: '/6', label: '6', color: 'bg-accent-sky', hex: '#38bdf8' },
   { path: '/7', label: '7', color: 'bg-accent-gold', hex: '#eab308' },
 ]

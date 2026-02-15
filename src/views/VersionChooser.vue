@@ -9,6 +9,7 @@ const versions = [
   { path: '/1', label: '01', name: 'Neon', color: 'border-accent-cyan', glow: 'hover:shadow-[0_0_30px_rgba(34,211,238,0.15)]', text: 'text-accent-cyan', hex: '#22d3ee' },
   { path: '/4', label: '04', name: 'Terminal', color: 'border-accent-emerald', glow: 'hover:shadow-[0_0_30px_rgba(52,211,153,0.15)]', text: 'text-accent-emerald', hex: '#34d399' },
   { path: '/5', label: '05', name: 'Minimal', color: 'border-accent-rose', glow: 'hover:shadow-[0_0_30px_rgba(251,113,133,0.15)]', text: 'text-accent-rose', hex: '#fb7185' },
+  { path: '/55', label: '55', name: 'Minimal-Full', color: 'border-accent-rose', glow: 'hover:shadow-[0_0_30px_rgba(251,113,133,0.15)]', text: 'text-accent-rose', hex: '#fb7185' },
   { path: '/6', label: '06', name: 'Brutalist', color: 'border-accent-sky', glow: 'hover:shadow-[0_0_30px_rgba(56,189,248,0.15)]', text: 'text-accent-sky', hex: '#38bdf8' },
   { path: '/7', label: '07', name: 'Editorial', color: 'border-accent-gold', glow: 'hover:shadow-[0_0_30px_rgba(234,179,8,0.15)]', text: 'text-accent-gold', hex: '#eab308' },
 ]

@@ -20,6 +20,10 @@ const router = createRouter({
       component: () => import('../views/Version5.vue'),
     },
     {
+      path: '/55',
+      component: () => import('../views/Version55.vue'),
+    },
+    {
       path: '/6',
       component: () => import('../views/Version6.vue'),
     },
