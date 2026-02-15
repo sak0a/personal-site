@@ -57,8 +57,46 @@ const footerContainerClass = computed(() => [
 ])
 
 const projectGridClass = computed(() =>
-  wideLayout.value ? 'grid grid-cols-1 lg:grid-cols-2 gap-x-10 gap-y-2' : '',
+  wideLayout.value ? 'grid grid-cols-1 lg:grid-cols-2 gap-x-10 gap-y-2 relative z-[1]' : 'relative z-[1]',
 )
+
+// Timeline: vertical line + horizontal branches (wide mode only)
+const gridWrapRef = ref(null)
+const timelineHeight = ref(0)
+const timelineBranches = ref([])
+
+function updateTimeline() {
+  if (!wideLayout.value || !gridWrapRef.value || projectEls.value.length === 0) {
+    timelineHeight.value = 0
+    timelineBranches.value = []
+    return
+  }
+  const wrapRect = gridWrapRef.value.getBoundingClientRect()
+  const branches = []
+
+  for (let i = 0; i < projects.length; i++) {
+    const el = projectEls.value[i]
+    if (!el) continue
+    const r = el.getBoundingClientRect()
+    // Skip cards that haven't appeared yet (still have 0 height or are off-screen)
+    if (r.height === 0) continue
+    const cardCenterY = r.top + r.height / 2 - wrapRect.top
+    const isLeft = i % 2 === 0
+    branches.push({ y: cardCenterY, isLeft })
+  }
+
+  // Timeline stops at last project card center
+  if (branches.length > 0) {
+    timelineHeight.value = branches[branches.length - 1].y
+  }
+  timelineBranches.value = branches
+}
+
+let timelineRaf = null
+function scheduleTimelineUpdate() {
+  if (timelineRaf) cancelAnimationFrame(timelineRaf)
+  timelineRaf = requestAnimationFrame(updateTimeline)
+}
 
 // Marquee — JS-driven for smooth speed transitions on hover
 const marqueeEl = ref(null)
@@ -139,7 +177,12 @@ onMounted(() => {
         if (el) dividerObserver.observe(el)
       })
     }
+    // Initial timeline measurement — run once early, then again after cards settle
+    scheduleTimelineUpdate()
+    setTimeout(scheduleTimelineUpdate, 900)
   }, 100)
+
+  window.addEventListener('resize', scheduleTimelineUpdate)
 })
 
 // Re-observe dividers when switching back to compact mode
@@ -153,12 +196,27 @@ watch(wideLayout, async (wide) => {
       if (el) dividerObserver.observe(el)
     })
   }
+  // Recalculate timeline after layout switch
+  setTimeout(scheduleTimelineUpdate, 350)
 }, { flush: 'post' })
+
+// Recalculate timeline when expand/collapse changes card heights
+watch(expandedId, () => {
+  setTimeout(scheduleTimelineUpdate, 550)
+})
+
+// Recalculate timeline as project cards become visible (scroll reveal settles)
+watch(projectVisible, () => {
+  // Cards animate in with 700ms transition, wait for them to settle
+  setTimeout(scheduleTimelineUpdate, 800)
+}, { deep: true })
 
 onUnmounted(() => {
   dividerObserver?.disconnect()
   projectObserver?.disconnect()
   if (marqueeRaf) cancelAnimationFrame(marqueeRaf)
+  if (timelineRaf) cancelAnimationFrame(timelineRaf)
+  window.removeEventListener('resize', scheduleTimelineUpdate)
 })
 </script>
 
@@ -210,8 +268,26 @@ onUnmounted(() => {
       </div>
     </section>
 
+    <!-- Full-page dotted background wrapper (projects → activity) -->
+    <div ref="gridWrapRef" :class="wideLayout ? 'v5-project-grid-wrap' : ''" class="relative">
+      <div v-if="wideLayout" class="v5-checker-bg hidden lg:block" />
+
+      <!-- Dynamic timeline: vertical line + horizontal branches -->
+      <div
+        v-if="wideLayout && timelineHeight > 0"
+        class="v5-timeline-line hidden lg:block"
+        :style="{ height: timelineHeight + 'px' }"
+      />
+      <div
+        v-for="(branch, bi) in timelineBranches"
+        :key="'branch-' + bi"
+        class="v5-timeline-branch hidden lg:block"
+        :class="branch.isLeft ? 'v5-branch-left' : 'v5-branch-right'"
+        :style="{ top: branch.y + 'px' }"
+      />
+
     <!-- Projects -->
-    <section class="reveal-slow pb-2">
+    <section class="reveal-slow pb-2 relative z-[1]">
       <h2
         class="font-bold mb-10 v5-heading-line"
         :class="wideLayout ? 'text-2xl lg:text-3xl' : 'text-2xl'"
@@ -221,16 +297,24 @@ onUnmounted(() => {
       </h2>
     </section>
 
-    <div :class="projectGridClass">
+      <div :class="projectGridClass">
       <template
         v-for="(project, i) in projects"
         :key="project.id"
       >
+        <!-- Wide mode zigzag spacers: empty cells to create alternating layout -->
+        <!-- Left spacer before odd project -->
+        <div v-if="wideLayout && i % 2 === 1" class="hidden lg:block" />
+
+        <!-- Project card — expansion happens inside the same elevated container -->
         <div
           :ref="el => { if (el) projectEls[i] = el }"
           :data-project-idx="i"
           class="transition-all duration-700 ease-out"
-          :class="projectVisible[i] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'"
+          :class="[
+            projectVisible[i] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6',
+            wideLayout ? 'v5-project-card-elevated' : ''
+          ]"
         >
           <ProjectCard
             :project="project"
@@ -242,6 +326,10 @@ onUnmounted(() => {
             @toggle="toggleProject(project.id)"
           />
         </div>
+
+        <!-- Right spacer after even project -->
+        <div v-if="wideLayout && i % 2 === 0" class="hidden lg:block" />
+
         <!-- Divider: compact mode only -->
         <div
           v-if="!wideLayout && i < projects.length - 1"
@@ -249,10 +337,10 @@ onUnmounted(() => {
           class="divider-draw my-2 w-full h-px bg-accent-rose/20 origin-left"
         />
       </template>
-    </div>
+      </div>
 
     <!-- Tech Stack -->
-    <section class="reveal-slow pt-20 pb-2">
+    <section class="reveal-slow pt-20 pb-2 relative z-[1]">
       <h2
         class="font-bold mb-10 v5-heading-line"
         :class="wideLayout ? 'text-2xl lg:text-3xl' : 'text-2xl'"
@@ -263,7 +351,8 @@ onUnmounted(() => {
     </section>
 
     <div
-      class="reveal-slow stack-marquee-wrap overflow-hidden"
+      class="reveal-slow stack-marquee-wrap overflow-hidden relative z-[1]"
+      :class="wideLayout ? 'v5-section-elevated' : ''"
       :style="{ '--accent': accent }"
       @mouseenter="marqueeHovered = true"
       @mouseleave="marqueeHovered = false"
@@ -283,7 +372,7 @@ onUnmounted(() => {
     </div>
 
     <!-- GitHub Activity -->
-    <section class="reveal-slow pt-20 pb-2">
+    <section class="reveal-slow pt-20 pb-2 relative z-[1]">
       <h2
         class="font-bold mb-10 v5-heading-line"
         :class="wideLayout ? 'text-2xl lg:text-3xl' : 'text-2xl'"
@@ -293,9 +382,11 @@ onUnmounted(() => {
       </h2>
     </section>
 
-    <div class="reveal-slow">
+    <div class="reveal-slow relative z-[1] pb-12" :class="wideLayout ? 'v5-section-elevated' : ''">
       <GitHubHeatmap username="sak0a" :accent-color="accent" />
     </div>
+
+    </div> <!-- end v5-project-grid-wrap -->
 
   </div>
 

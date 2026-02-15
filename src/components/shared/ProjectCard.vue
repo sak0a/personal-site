@@ -27,6 +27,10 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  hideDetails: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emit = defineEmits(['toggle'])
@@ -235,8 +239,8 @@ const isIcon = props.project.imageType === 'icon'
       class="text-zinc-400 leading-relaxed transition-colors duration-300 group-hover:text-zinc-300"
     />
 
-    <!-- Expandable details -->
-    <div class="grid transition-[grid-template-rows] duration-300 ease-out" :style="{ gridTemplateRows: expanded ? '1fr' : '0fr' }">
+    <!-- Expandable details (hidden when parent handles expansion in wide mode) -->
+    <div v-if="!hideDetails" class="grid transition-[grid-template-rows] duration-300 ease-out" :style="{ gridTemplateRows: expanded ? '1fr' : '0fr' }">
       <div class="overflow-hidden">
         <div class="pt-4">
           <!-- Image — cascade step 1 -->

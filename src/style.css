@@ -375,6 +375,133 @@ body {
   transform: translateY(0);
 }
 
+/* V5: Smooth slide-down for expand detail cells */
+.v5-detail-slide {
+  transition: grid-template-rows 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* V5: Fade children in/out when detail cell opens/closes */
+.v5-expand-detail-cell {
+  transition: opacity 0.4s ease;
+}
+.v5-expand-detail-cell.v5-detail-visible {
+  opacity: 1;
+}
+.v5-expand-detail-cell.v5-detail-hidden {
+  opacity: 0;
+}
+
+/* Staggered child fade-in when visible */
+.v5-expand-detail-cell.v5-detail-visible .v5-expand-image {
+  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.08s, transform 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.08s;
+  opacity: 0.9;
+  transform: translateY(0);
+}
+.v5-expand-detail-cell.v5-detail-visible .v5-expand-links {
+  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.18s, transform 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.18s;
+  opacity: 1;
+  transform: translateY(0);
+}
+.v5-expand-detail-cell.v5-detail-visible .v5-expand-tags {
+  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.28s, transform 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.28s;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Hidden state for children (used by both visible→hidden and initial) */
+.v5-expand-detail-cell.v5-detail-hidden .v5-expand-image,
+.v5-expand-detail-cell.v5-detail-hidden .v5-expand-links,
+.v5-expand-detail-cell.v5-detail-hidden .v5-expand-tags {
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+/* V5: Project grid wrapper (wide mode only) */
+.v5-project-grid-wrap {
+  position: relative;
+}
+
+/* V5: Dynamic timeline — vertical line that stops at last project */
+.v5-timeline-line {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 1px;
+  transform: translateX(-0.5px);
+  pointer-events: none;
+  z-index: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(251, 113, 133, 0.12) 60px,
+    rgba(251, 113, 133, 0.12) calc(100% - 20px),
+    transparent 100%
+  );
+  transition: height 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* V5: Timeline horizontal branches toward project cards */
+.v5-timeline-branch {
+  position: absolute;
+  height: 1px;
+  pointer-events: none;
+  z-index: 0;
+  background: rgba(251, 113, 133, 0.12);
+  transition: top 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+/* Left card: branch goes from center leftward (toward card's right edge) */
+.v5-timeline-branch.v5-branch-left {
+  right: 50%;
+  width: 24px;
+}
+/* Right card: branch goes from center rightward (toward card's left edge) */
+.v5-timeline-branch.v5-branch-right {
+  left: 50%;
+  width: 24px;
+}
+
+/* Dotted grid background pattern */
+.v5-checker-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.18) 1px, transparent 1px);
+  background-size: 30px 30px;
+  mask-image:
+    linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, black 3%, black 97%, transparent 100%);
+  mask-composite: intersect;
+  -webkit-mask-image:
+    linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, black 3%, black 97%, transparent 100%);
+  -webkit-mask-composite: source-in;
+}
+
+/* V5: Elevated section panel (stack marquee, heatmap) */
+.v5-section-elevated {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.015) 0%, rgba(255, 255, 255, 0.004) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.035);
+  border-radius: 14px;
+  padding: 1.5rem 1.25rem;
+  backdrop-filter: blur(6px);
+}
+
+/* V5: Elevated project card in wide mode */
+.v5-project-card-elevated {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0.005) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  padding: 0 1.25rem;
+  backdrop-filter: blur(4px);
+  transition: border-color 0.3s ease, background 0.3s ease, opacity 0.7s ease, transform 0.7s ease;
+}
+.v5-project-card-elevated:hover {
+  border-color: rgba(251, 113, 133, 0.1);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.008) 100%);
+}
+
 /* V5: Year label slide on group hover */
 .v5-year {
   transition: transform 0.3s ease, color 0.3s ease;
