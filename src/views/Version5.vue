@@ -228,7 +228,7 @@ onUnmounted(() => {
 <template>
   <div>
   <BackgroundEffects />
-  <div ref="container" :class="containerClass">
+  <main ref="container" :class="containerClass">
     <!-- Hero with char-reveal + magnetic title -->
     <section class="min-h-screen flex flex-col justify-center pb-16 pt-24" :class="wideLayout ? 'lg:pb-20' : ''">
       <div class="inline-block mb-6">
@@ -394,7 +394,7 @@ onUnmounted(() => {
 
     </div> <!-- end v5-project-grid-wrap -->
 
-  </div>
+  </main>
 
     <!-- Footer area -->
     <div :class="footerContainerClass">
