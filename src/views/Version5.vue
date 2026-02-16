@@ -7,6 +7,7 @@ import ProjectCard from '../components/shared/ProjectCard.vue'
 import GitHubHeatmap from '../components/shared/GitHubHeatmap.vue'
 import FooterSection from '../components/shared/FooterSection.vue'
 import TextEffect from '../components/shared/TextEffect.vue'
+import BackgroundEffects from '../components/shared/BackgroundEffects.vue'
 import { projects } from '../data/projects'
 import { links } from '../data/links'
 import { stack } from '../data/stack'
@@ -226,6 +227,7 @@ onUnmounted(() => {
 
 <template>
   <div>
+  <BackgroundEffects />
   <div ref="container" :class="containerClass">
     <!-- Hero with char-reveal + magnetic title -->
     <section class="min-h-screen flex flex-col justify-center pb-16 pt-24" :class="wideLayout ? 'lg:pb-20' : ''">

@@ -479,6 +479,78 @@ body {
   -webkit-mask-composite: source-in;
 }
 
+/* V5: Animated background effects — floating particles + ambient glow */
+.bg-effects {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.bg-particle {
+  position: absolute;
+  bottom: -5%;
+  border-radius: 50%;
+  background: white;
+  will-change: transform;
+  animation: bg-particle-float linear infinite;
+}
+
+@keyframes bg-particle-float {
+  0% {
+    transform: translateY(0) translateX(0);
+  }
+  100% {
+    transform: translateY(-110vh) translateX(var(--drift, 0px));
+  }
+}
+
+.bg-glow-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  will-change: transform;
+}
+
+.bg-glow-orb-1 {
+  width: 500px;
+  height: 500px;
+  left: 10%;
+  top: 20%;
+  background: radial-gradient(circle, rgba(251, 113, 133, 0.018) 0%, transparent 70%);
+  animation: bg-glow-drift-1 28s ease-in-out infinite;
+}
+
+.bg-glow-orb-2 {
+  width: 400px;
+  height: 400px;
+  right: 5%;
+  top: 55%;
+  background: radial-gradient(circle, rgba(251, 113, 133, 0.012) 0%, transparent 70%);
+  animation: bg-glow-drift-2 34s ease-in-out infinite;
+}
+
+@keyframes bg-glow-drift-1 {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(40px, -30px); }
+  50% { transform: translate(-25px, 40px); }
+  75% { transform: translate(15px, -15px); }
+}
+
+@keyframes bg-glow-drift-2 {
+  0%, 100% { transform: translate(0, 0); }
+  33% { transform: translate(-30px, 20px); }
+  66% { transform: translate(25px, -35px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bg-particle,
+  .bg-glow-orb {
+    animation: none;
+  }
+}
+
 /* V5: Elevated section panel (stack marquee, heatmap) */
 .v5-section-elevated {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.015) 0%, rgba(255, 255, 255, 0.004) 100%);
