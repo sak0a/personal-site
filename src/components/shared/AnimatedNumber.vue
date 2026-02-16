@@ -2,7 +2,9 @@
 import { ref, watch, onMounted, onUnmounted } from 'vue'
 
 // ---------------------------------------------------------------------------
-// Spring physics engine (self-contained, no external dependencies)
+// Spring physics engine – sub-stepped for mobile stability
+// Fixed-size physics steps (4 ms) prevent numerical explosion when
+// requestAnimationFrame fires after long gaps (background tabs, throttling).
 // ---------------------------------------------------------------------------
 
 export type SpringOptions = {
@@ -11,51 +13,35 @@ export type SpringOptions = {
   mass?: number
 }
 
+const FIXED_DT = 0.004 // 4 ms fixed physics step
+const MAX_STEPS = 100 // cap sub-steps per frame (= 400 ms max catch-up)
+const MAX_DURATION = 5000 // hard timeout — snap to target
+
 function createSpring(options: SpringOptions = {}) {
   const { stiffness = 280, damping = 18, mass = 0.3 } = options
 
   let current = 0
   let target = 0
   let velocity = 0
-  let animating = false
   let rafId: number | null = null
-  let timeoutId: ReturnType<typeof setTimeout> | null = null
   let onUpdateCb: ((value: number) => void) | null = null
-  let onCompleteCb: (() => void) | null = null
   let lastTime: number | null = null
   let startTime: number | null = null
-  const MAX_DURATION = 5000 // hard cap at 5 seconds
 
-  function schedule() {
-    if (typeof document !== 'undefined' && document.hidden) {
-      timeoutId = setTimeout(() => {
-        timeoutId = null
-        tick(performance.now())
-      }, 16)
-    } else {
-      rafId = requestAnimationFrame(tick)
-    }
-  }
-
-  function cancelScheduled() {
+  function cancel() {
     if (rafId !== null) {
       cancelAnimationFrame(rafId)
       rafId = null
-    }
-    if (timeoutId !== null) {
-      clearTimeout(timeoutId)
-      timeoutId = null
     }
   }
 
   function tick(time: number) {
     rafId = null
-    timeoutId = null
 
     if (lastTime === null) {
       lastTime = time
       if (startTime === null) startTime = time
-      schedule()
+      rafId = requestAnimationFrame(tick)
       return
     }
 
@@ -63,40 +49,43 @@ function createSpring(options: SpringOptions = {}) {
     if (startTime !== null && time - startTime > MAX_DURATION) {
       current = target
       velocity = 0
-      animating = false
       onUpdateCb?.(current)
-      onCompleteCb?.()
       lastTime = null
       startTime = null
       return
     }
 
-    const dt = Math.min((time - lastTime) / 1000, 0.064)
+    // Elapsed time since last frame, capped to avoid runaway on resume
+    const frameDt = Math.min((time - lastTime) / 1000, MAX_STEPS * FIXED_DT)
     lastTime = time
 
-    const displacement = current - target
-    const springForce = -stiffness * displacement
-    const dampingForce = -damping * velocity
-    const acceleration = (springForce + dampingForce) / mass
+    // Sub-step: run physics in fixed increments for numerical stability
+    let remaining = frameDt
+    while (remaining > 0) {
+      const dt = Math.min(remaining, FIXED_DT)
+      const displacement = current - target
+      const springForce = -stiffness * displacement
+      const dampingForce = -damping * velocity
+      const acceleration = (springForce + dampingForce) / mass
 
-    velocity += acceleration * dt
-    current += velocity * dt
+      velocity += acceleration * dt
+      current += velocity * dt
+      remaining -= dt
+    }
 
-    // Scale settle threshold with target magnitude — prevents endless tiny oscillation
-    const settleThreshold = Math.max(0.5, Math.abs(target) * 0.0001)
+    // Settle check — scale threshold with target magnitude
+    const settleThreshold = Math.max(0.5, Math.abs(target) * 0.001)
     if (Math.abs(velocity) < settleThreshold && Math.abs(current - target) < settleThreshold) {
       current = target
       velocity = 0
-      animating = false
       onUpdateCb?.(current)
-      onCompleteCb?.()
       lastTime = null
       startTime = null
       return
     }
 
     onUpdateCb?.(current)
-    schedule()
+    rafId = requestAnimationFrame(tick)
   }
 
   return {
@@ -104,9 +93,8 @@ function createSpring(options: SpringOptions = {}) {
       target = newTarget
       lastTime = null
       startTime = null
-      cancelScheduled()
-      animating = true
-      schedule()
+      cancel()
+      rafId = requestAnimationFrame(tick)
     },
     initialize(value: number) {
       current = value
@@ -116,12 +104,8 @@ function createSpring(options: SpringOptions = {}) {
     subscribe(callback: (value: number) => void) {
       onUpdateCb = callback
     },
-    onComplete(callback: () => void) {
-      onCompleteCb = callback
-    },
     destroy() {
-      cancelScheduled()
-      animating = false
+      cancel()
       lastTime = null
     },
     get() {
