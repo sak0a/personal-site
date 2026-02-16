@@ -289,7 +289,7 @@ body {
   transform: translateY(-2px);
 }
 .v5-contact-text {
-  font-size: 1.125rem;
+  font-size: 0.875rem;
   font-weight: 500;
   color: #a1a1aa;
   transition: color 0.3s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
@@ -307,6 +307,252 @@ body {
 .v5-contact-link:hover .v5-contact-arrow {
   opacity: 1;
   transform: translateX(0);
+}
+
+/* V5: Contact form — progressive reveal with blur-in */
+.v5-contact-form {
+  margin-top: 1.5rem;
+}
+.v5-cf-sent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 0;
+  animation: v5-cf-fade-in 0.6s ease-out forwards;
+}
+@keyframes v5-cf-fade-in {
+  0% { opacity: 0; transform: translateY(8px); filter: blur(6px); }
+  100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+/* Progressive layout — compact, fields grow in */
+.v5-cf-fields-progressive {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Step progress dots */
+.v5-cf-steps {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 1rem;
+}
+.v5-cf-step-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #27272a;
+  transition: background 0.4s ease, box-shadow 0.4s ease;
+}
+.v5-cf-step-dot.active {
+  background: var(--accent);
+  box-shadow: 0 0 6px var(--accent);
+}
+
+/* Each field — blur-in reveal */
+.v5-cf-field,
+.v5-cf-submit-wrap {
+  opacity: 0;
+  transform: translateY(12px);
+  filter: blur(10px);
+  transition:
+    opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+    max-height 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    margin 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.v5-cf-field.visible,
+.v5-cf-submit-wrap.visible {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+
+/* Progressive fields collapse to zero when hidden */
+.v5-cf-progressive {
+  max-height: 0;
+  overflow: hidden;
+  margin-top: 0;
+}
+.v5-cf-progressive.visible {
+  max-height: 12rem;
+  overflow: visible;
+  margin-top: 1rem;
+}
+/* Hidden state — fully collapsed */
+.v5-cf-hidden {
+  max-height: 0 !important;
+  margin-top: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* First field (name) gets top margin when visible */
+.v5-cf-field:first-of-type.visible {
+  margin-top: 0;
+}
+
+/* Floating label */
+.v5-cf-field {
+  position: relative;
+}
+.v5-cf-label {
+  position: absolute;
+  top: 0.75rem;
+  left: 0;
+  font-size: 0.875rem;
+  color: #71717a;
+  pointer-events: none;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), color 0.3s ease, font-size 0.3s ease;
+  transform-origin: left;
+}
+.v5-cf-field.focused .v5-cf-label,
+.v5-cf-field.filled .v5-cf-label {
+  transform: translateY(-1.4rem);
+  font-size: 0.7rem;
+  color: var(--accent);
+}
+
+/* Input & textarea */
+.v5-cf-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #e4e4e7;
+  font-size: 0.9375rem;
+  font-family: inherit;
+  padding: 0.75rem 0 0.5rem;
+  caret-color: var(--accent);
+  transition: color 0.3s ease;
+}
+.v5-cf-textarea {
+  resize: vertical;
+  min-height: 5rem;
+}
+
+/* Animated underline */
+.v5-cf-line {
+  display: block;
+  width: 100%;
+  height: 1px;
+  background: #27272a;
+  position: relative;
+}
+.v5-cf-line::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.v5-cf-field.focused .v5-cf-line::after {
+  transform: scaleX(1);
+}
+
+/* Submit button */
+.v5-cf-submit {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.5rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: transparent;
+  color: #a1a1aa;
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition:
+    border-color 0.35s ease,
+    color 0.35s ease,
+    background 0.35s ease,
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.v5-cf-submit:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(251, 113, 133, 0.06);
+  transform: translateY(-1px);
+}
+.v5-cf-submit:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* Submit arrow */
+.v5-cf-submit-arrow {
+  display: inline-flex;
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: opacity 0.3s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.v5-cf-submit:hover:not(:disabled) .v5-cf-submit-arrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* V5: TextMorphInput — per-char animated input using Web Animations API */
+.v5-tmi-wrap {
+  position: relative;
+  cursor: text;
+}
+
+/* Real input on top — transparent text so native caret & selection work,
+   while the animated mirror characters show through underneath. */
+.v5-tmi-real {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  color: transparent;
+  font-size: 0.9375rem;
+  font-family: inherit;
+  line-height: 1.5;
+  caret-color: var(--accent);
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  z-index: 2;
+  padding: 0.75rem 0 0.5rem;
+  /* Selection highlight shows through with transparent text */
+}
+.v5-tmi-real::selection {
+  background: rgba(251, 113, 133, 0.25);
+  color: transparent;
+}
+
+/* Mirror underneath: animated character visuals */
+.v5-tmi-mirror {
+  position: relative;
+  min-height: 2.25rem;
+  padding: 0.75rem 0 0.5rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: #e4e4e7;
+  pointer-events: none;
+  z-index: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.v5-tmi-mirror-multi {
+  min-height: 5rem;
+}
+.v5-tmi-char {
+  display: inline;
+  white-space: pre;
+  will-change: opacity, filter, transform;
 }
 
 /* V5: "projects" heading — accent line draws from left */
@@ -510,7 +756,7 @@ body {
   width: 24px;
 }
 
-/* Dotted grid background pattern */
+/* Dotted grid background pattern — scoped to grid wrap */
 .v5-checker-bg {
   position: absolute;
   inset: 0;
@@ -525,6 +771,27 @@ body {
   -webkit-mask-image:
     linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%),
     linear-gradient(to bottom, transparent 0%, black 3%, black 97%, transparent 100%);
+  -webkit-mask-composite: source-in;
+}
+
+/* Dotted grid — full viewport width, faded edges */
+.v5-checker-bg-full {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.12) 1px, transparent 1px);
+  background-size: 30px 30px;
+  mask-image:
+    linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, black 2%, black 95%, transparent 100%);
+  mask-composite: intersect;
+  -webkit-mask-image:
+    linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, black 2%, black 95%, transparent 100%);
   -webkit-mask-composite: source-in;
 }
 

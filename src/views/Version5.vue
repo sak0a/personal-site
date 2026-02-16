@@ -7,6 +7,7 @@ import ProjectCard from '../components/shared/ProjectCard.vue'
 import GitHubHeatmap from '../components/shared/GitHubHeatmap.vue'
 import FooterSection from '../components/shared/FooterSection.vue'
 import TextEffect from '../components/shared/TextEffect.vue'
+import ContactForm from '../components/shared/ContactForm.vue'
 import { projects } from '../data/projects'
 import { links } from '../data/links'
 import { stack } from '../data/stack'
@@ -225,7 +226,9 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div>
+  <div class="relative overflow-x-hidden">
+  <!-- Full-width dotted grid background -->
+  <div class="v5-checker-bg-full" />
   <div ref="container" :class="containerClass">
     <!-- Hero with char-reveal + magnetic title -->
     <section class="min-h-screen flex flex-col justify-center pb-16 pt-24" :class="wideLayout ? 'lg:pb-20' : ''">
@@ -274,7 +277,6 @@ onUnmounted(() => {
 
     <!-- Full-page dotted background wrapper (projects → activity) -->
     <div ref="gridWrapRef" :class="wideLayout ? 'v5-project-grid-wrap' : ''" class="relative">
-      <div v-if="wideLayout" class="v5-checker-bg hidden lg:block" />
 
       <!-- Dynamic timeline: vertical line + horizontal branches -->
       <div
@@ -402,30 +404,32 @@ onUnmounted(() => {
     </section>
 
     <div class="reveal-slow relative z-[1] pb-12" :class="wideLayout ? 'v5-section-elevated' : ''">
-      <p class="text-zinc-500 leading-relaxed" :class="wideLayout ? 'text-lg' : 'text-base'">
-        Want to work together or just say hi?
-      </p>
-      <a
-        href="mailto:hello@saka.at"
-        class="v5-contact-link group/mail inline-flex items-center gap-2.5 mt-4"
-        :style="{ '--accent': accent }"
-      >
-        <span class="v5-contact-icon">
-          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
-          </svg>
-        </span>
-        <span class="v5-contact-text">hello@saka.at</span>
-        <span class="v5-contact-arrow">
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75" />
-          </svg>
-        </span>
-      </a>
+      <div class="flex items-center gap-3 mb-5">
+        <a
+          href="mailto:hello@saka.at"
+          class="v5-contact-link group/mail inline-flex items-center gap-2"
+          :style="{ '--accent': accent }"
+        >
+          <span class="v5-contact-icon">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+            </svg>
+          </span>
+          <span class="v5-contact-text">hello@saka.at</span>
+          <span class="v5-contact-arrow">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75" />
+            </svg>
+          </span>
+        </a>
+        <span class="text-zinc-700 text-sm">or</span>
+      </div>
+      <ContactForm :accent-color="accent" />
     </div>
 
     </div> <!-- end v5-project-grid-wrap -->
 
+    <div class="h-24 lg:h-32" />
   </div>
 
     <!-- Footer area -->
