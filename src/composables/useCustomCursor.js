@@ -25,7 +25,7 @@ export function useCustomCursor(config, containerRef) {
   // Rose trail state
   let trailParticles = []
   let trailFrame = 0
-  const TRAIL_MAX = 15
+  const TRAIL_MAX = 25
   let prevMouseX = 0
   let prevMouseY = 0
 

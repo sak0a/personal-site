@@ -390,6 +390,40 @@ onUnmounted(() => {
       <GitHubHeatmap username="sak0a" :accent-color="accent" />
     </div>
 
+    <!-- Contact -->
+    <section class="reveal-slow pt-20 pb-2 relative z-[1]">
+      <h2
+        class="font-bold mb-10 v5-heading-line"
+        :class="wideLayout ? 'text-2xl lg:text-3xl' : 'text-2xl'"
+        :style="{ '--accent': accent }"
+      >
+        contact
+      </h2>
+    </section>
+
+    <div class="reveal-slow relative z-[1] pb-12" :class="wideLayout ? 'v5-section-elevated' : ''">
+      <p class="text-zinc-500 leading-relaxed" :class="wideLayout ? 'text-lg' : 'text-base'">
+        Want to work together or just say hi?
+      </p>
+      <a
+        href="mailto:hello@saka.at"
+        class="v5-contact-link group/mail inline-flex items-center gap-2.5 mt-4"
+        :style="{ '--accent': accent }"
+      >
+        <span class="v5-contact-icon">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+          </svg>
+        </span>
+        <span class="v5-contact-text">hello@saka.at</span>
+        <span class="v5-contact-arrow">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75" />
+          </svg>
+        </span>
+      </a>
+    </div>
+
     </div> <!-- end v5-project-grid-wrap -->
 
   </div>

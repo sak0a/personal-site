@@ -260,6 +260,55 @@ body {
   transform: scaleX(1);
 }
 
+/* V5: Contact link — icon shift + text slide + arrow reveal + underline */
+.v5-contact-link {
+  position: relative;
+  text-decoration: none;
+  padding-bottom: 2px;
+}
+.v5-contact-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.v5-contact-link:hover::after {
+  transform: scaleX(1);
+}
+.v5-contact-icon {
+  color: var(--accent);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.v5-contact-link:hover .v5-contact-icon {
+  transform: translateY(-2px);
+}
+.v5-contact-text {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: #a1a1aa;
+  transition: color 0.3s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.v5-contact-link:hover .v5-contact-text {
+  color: var(--accent);
+  transform: translateX(2px);
+}
+.v5-contact-arrow {
+  color: var(--accent);
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: opacity 0.3s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.v5-contact-link:hover .v5-contact-arrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+
 /* V5: "projects" heading — accent line draws from left */
 .v5-heading-line {
   position: relative;
@@ -665,7 +714,7 @@ body {
   pointer-events: none;
   z-index: 9998;
   will-change: transform, opacity;
-  animation: cursor-trail-fade 0.4s ease-out forwards;
+  animation: cursor-trail-fade 0.7s ease-out forwards;
 }
 @keyframes cursor-trail-fade {
   0% { opacity: 0.5; transform: var(--trail-pos) scale(1); }
