@@ -23,6 +23,8 @@ function createSpring(options: SpringOptions = {}) {
   let onUpdateCb: ((value: number) => void) | null = null
   let onCompleteCb: (() => void) | null = null
   let lastTime: number | null = null
+  let startTime: number | null = null
+  const MAX_DURATION = 5000 // hard cap at 5 seconds
 
   function schedule() {
     if (typeof document !== 'undefined' && document.hidden) {
@@ -52,7 +54,20 @@ function createSpring(options: SpringOptions = {}) {
 
     if (lastTime === null) {
       lastTime = time
+      if (startTime === null) startTime = time
       schedule()
+      return
+    }
+
+    // Hard timeout — snap to target if running too long
+    if (startTime !== null && time - startTime > MAX_DURATION) {
+      current = target
+      velocity = 0
+      animating = false
+      onUpdateCb?.(current)
+      onCompleteCb?.()
+      lastTime = null
+      startTime = null
       return
     }
 
@@ -67,13 +82,16 @@ function createSpring(options: SpringOptions = {}) {
     velocity += acceleration * dt
     current += velocity * dt
 
-    if (Math.abs(velocity) < 0.01 && Math.abs(current - target) < 0.001) {
+    // Scale settle threshold with target magnitude — prevents endless tiny oscillation
+    const settleThreshold = Math.max(0.5, Math.abs(target) * 0.0001)
+    if (Math.abs(velocity) < settleThreshold && Math.abs(current - target) < settleThreshold) {
       current = target
       velocity = 0
       animating = false
       onUpdateCb?.(current)
       onCompleteCb?.()
       lastTime = null
+      startTime = null
       return
     }
 
@@ -85,6 +103,7 @@ function createSpring(options: SpringOptions = {}) {
     set(newTarget: number) {
       target = newTarget
       lastTime = null
+      startTime = null
       cancelScheduled()
       animating = true
       schedule()

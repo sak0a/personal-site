@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted, computed, nextTick, watch } from 'vue'
+import { ref, onMounted, onUnmounted, computed, nextTick } from 'vue'
 import AnimatedNumber from './AnimatedNumber.vue'
 
 const props = defineProps({
@@ -7,26 +7,25 @@ const props = defineProps({
   accentColor: { type: String, default: '#fb7185' },
 })
 
-// Responsive cell sizing — measure container and compute cell size to fill it
+// Responsive cell sizing
 const containerWidth = ref(0)
 let resizeObserverInstance = null
 
 const contributions = ref([])
 const totalCount = ref(0)
-const displayCount = ref(0) // stays 0 until scrolled into view
+const displayCount = ref(0)
 const loading = ref(true)
 const error = ref(false)
 const heatmapRoot = ref(null)
-let observer = null
-
-// Tooltip state — always mounted, uses opacity + CSS transitions for smooth feel
-const tooltip = ref({ visible: false, x: 0, y: 0, count: 0, date: '' })
 const heatmapWrapper = ref(null)
 const scrollContainer = ref(null)
+let observer = null
+
+// Tooltip state
+const tooltip = ref({ visible: false, x: 0, y: 0, count: 0, date: '' })
 let hideTimer = null
 
 function showTooltip(event, day) {
-  // Cancel any pending hide so moving between cells stays smooth
   if (hideTimer) {
     clearTimeout(hideTimer)
     hideTimer = null
@@ -35,12 +34,10 @@ function showTooltip(event, day) {
   const wrapperRect = heatmapWrapper.value.getBoundingClientRect()
   const wrapperWidth = wrapperRect.width
 
-  // Position relative to wrapper (which has overflow:visible for tooltip)
   let x = event.clientX - wrapperRect.left
   const y = event.clientY - wrapperRect.top - 40
 
-  // Clamp x so tooltip doesn't overflow left/right of wrapper
-  const tooltipHalfWidth = 120 // rough estimate
+  const tooltipHalfWidth = 120
   if (x < tooltipHalfWidth) x = tooltipHalfWidth
   if (x > wrapperWidth - tooltipHalfWidth) x = wrapperWidth - tooltipHalfWidth
 
@@ -54,13 +51,12 @@ function showTooltip(event, day) {
 }
 
 function hideTooltip() {
-  // Short delay before hiding — prevents flicker when moving between adjacent cells
   hideTimer = setTimeout(() => {
     tooltip.value.visible = false
   }, 80)
 }
 
-// Generate 4 opacity levels from the accent color
+// 4 opacity levels from accent color
 const levels = computed(() => [
   'transparent',
   props.accentColor + '20',
@@ -69,7 +65,7 @@ const levels = computed(() => [
   props.accentColor,
 ])
 
-// Group contributions into weeks (columns) for the heatmap grid
+// Group contributions into weeks (columns)
 const weeks = computed(() => {
   if (!contributions.value.length) return []
 
@@ -78,7 +74,7 @@ const weeks = computed(() => {
 
   contributions.value.forEach((day) => {
     const d = new Date(day.date)
-    const dow = d.getDay() // 0=Sun, 6=Sat
+    const dow = d.getDay()
 
     if (dow === 0 && currentWeek.length > 0) {
       cols.push(currentWeek)
@@ -91,24 +87,22 @@ const weeks = computed(() => {
   return cols
 })
 
-// Dynamic cell sizing based on container width
+// Dynamic cell sizing — fill the container width exactly
 const cellStep = computed(() => {
-  if (!weeks.value.length || !containerWidth.value) return 14
-  // step = cellSize + gap; we want weeks * step to fill the container
-  return Math.max(14, Math.floor(containerWidth.value / weeks.value.length))
+  const w = containerWidth.value
+  const wks = weeks.value.length
+  if (!wks || !w) return 14
+  const step = Math.floor(w / wks)
+  return Math.max(10, step)
 })
 
-const cellSize = computed(() => {
-  // Leave a 3px gap minimum between cells
-  return Math.max(11, cellStep.value - 3)
-})
-
-const cellRadius = computed(() => Math.max(2, Math.round(cellSize.value * 0.18)))
+const cellSize = computed(() => Math.max(7, cellStep.value - Math.max(2, Math.round(cellStep.value * 0.2))))
+const cellRadius = computed(() => Math.max(2, Math.round(cellSize.value * 0.2)))
 
 const svgWidth = computed(() => weeks.value.length * cellStep.value + 2)
 const svgHeight = computed(() => 7 * cellStep.value + 20)
 
-// Month labels positioned above the grid
+// Month labels
 const monthLabels = computed(() => {
   if (!weeks.value.length) return []
 
@@ -132,37 +126,79 @@ const monthLabels = computed(() => {
   return labels
 })
 
+// Year separator lines — drawn between last week of prev year and first week of current year
+const yearSeparator = computed(() => {
+  if (!weeks.value.length) return null
+
+  for (let wi = 1; wi < weeks.value.length; wi++) {
+    const prevDate = new Date(weeks.value[wi - 1][0].date)
+    const currDate = new Date(weeks.value[wi][0].date)
+    if (currDate.getFullYear() > prevDate.getFullYear()) {
+      return {
+        x: wi * cellStep.value - Math.floor(cellStep.value / 2),
+        year: currDate.getFullYear(),
+      }
+    }
+  }
+  return null
+})
+
+// Date range label
+const dateRange = computed(() => {
+  if (!contributions.value.length) return ''
+  const first = new Date(contributions.value[0].date)
+  const last = new Date(contributions.value[contributions.value.length - 1].date)
+  const fmt = (d) => d.toLocaleString('en', { month: 'short', year: 'numeric' })
+  return `${fmt(first)} – ${fmt(last)}`
+})
+
 onMounted(async () => {
   try {
-    const res = await fetch(
-      `https://github-contributions-api.jogruber.de/v4/${props.username}?y=last`
-    )
-    if (!res.ok) throw new Error('Failed to fetch')
-    const data = await res.json()
-
-    // Filter to exactly the last 12 months (from today back 365 days)
     const now = new Date()
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-    const cutoff = new Date(today)
-    cutoff.setFullYear(cutoff.getFullYear() - 1)
+    const currentYear = now.getFullYear()
+    const prevYear = currentYear - 1
+    const todayStr = now.toISOString().split('T')[0]
 
-    const filtered = data.contributions.filter((d) => {
+    // Fetch previous full year + current year in parallel
+    const [resPrev, resCurr] = await Promise.all([
+      fetch(`https://github-contributions-api.jogruber.de/v4/${props.username}?y=${prevYear}`),
+      fetch(`https://github-contributions-api.jogruber.de/v4/${props.username}?y=${currentYear}`),
+    ])
+
+    if (!resPrev.ok || !resCurr.ok) throw new Error('Failed to fetch')
+
+    const [dataPrev, dataCurr] = await Promise.all([resPrev.json(), resCurr.json()])
+
+    // Full previous year (Jan 1 – Dec 31) + current year up to today
+    const prevContribs = dataPrev.contributions.filter((d) => {
       const date = new Date(d.date)
-      return date >= cutoff && date <= today
+      return date.getFullYear() === prevYear
     })
 
-    contributions.value = filtered
-    totalCount.value = filtered.reduce((sum, d) => sum + d.count, 0)
+    const currContribs = dataCurr.contributions.filter((d) => {
+      return d.date <= todayStr
+    })
 
-    // Scroll to the right (most recent) after render
+    const allContribs = [...prevContribs, ...currContribs]
+
+    contributions.value = allContribs
+    totalCount.value = allContribs.reduce((sum, d) => sum + d.count, 0)
+
+    // Switch to rendered state so the heatmap DOM exists
+    loading.value = false
+
     await nextTick()
+
+    // Measure container first, then scroll
+    measureContainer()
+
+    // Scroll to end (most recent)
     scrollToEnd()
 
-    // Start IntersectionObserver to trigger count animation on scroll into view
+    // IntersectionObserver for count animation
     setupScrollTrigger()
 
-    // Measure container and watch for resizes
-    measureContainer()
+    // Watch for resizes
     if (scrollContainer.value) {
       resizeObserverInstance = new ResizeObserver(() => measureContainer())
       resizeObserverInstance.observe(scrollContainer.value)
@@ -180,7 +216,6 @@ function measureContainer() {
   }
 }
 
-// Trigger animated count only when the section scrolls into view
 function setupScrollTrigger() {
   if (!heatmapRoot.value) return
 
@@ -192,7 +227,7 @@ function setupScrollTrigger() {
         observer = null
       }
     },
-    { threshold: 0.2 }
+    { threshold: 0.2 },
   )
   observer.observe(heatmapRoot.value)
 }
@@ -208,11 +243,9 @@ onUnmounted(() => {
   }
 })
 
-// Reliable scroll-to-end with a small retry to handle late layout
 function scrollToEnd() {
   if (!scrollContainer.value) return
   scrollContainer.value.scrollLeft = scrollContainer.value.scrollWidth
-  // Double-check after a frame in case layout wasn't fully settled
   requestAnimationFrame(() => {
     if (scrollContainer.value) {
       scrollContainer.value.scrollLeft = scrollContainer.value.scrollWidth
@@ -246,17 +279,17 @@ function formatDate(dateStr) {
     <!-- Heatmap -->
     <div v-else>
       <div class="flex items-baseline gap-3 mb-4">
-   
-        <!--<span class="text-2xl font-bold" :style="{ color: accentColor }">{{ totalCount.toLocaleString() }}</span>-->
         <AnimatedNumber
-        :value="displayCount"
-        :spring-options="{ stiffness: 100, damping: 80, mass: 0.5 }"
-        class="text-2xl font-bold"
-        :style="{ color: accentColor }" />
-        <span class="text-sm text-zinc-500">contributions in the last 12 months</span>
+          :value="displayCount"
+          :spring-options="{ stiffness: 100, damping: 80, mass: 0.5 }"
+          class="text-2xl font-bold"
+          :style="{ color: accentColor }"
+        />
+        <span class="text-sm text-zinc-500">contributions</span>
+        <span class="text-xs text-zinc-700">{{ dateRange }}</span>
       </div>
 
-      <!-- Wrapper for tooltip positioning (no overflow hidden) -->
+      <!-- Wrapper for tooltip positioning -->
       <div ref="heatmapWrapper" class="relative">
         <!-- Scrollable SVG container -->
         <div ref="scrollContainer" class="overflow-x-auto pb-2 heatmap-scroll">
@@ -274,6 +307,19 @@ function formatDate(dateStr) {
               class="fill-zinc-600"
               style="font-size: 10px"
             >{{ label.text }}</text>
+
+            <!-- Year separator line -->
+            <g v-if="yearSeparator">
+              <line
+                :x1="yearSeparator.x"
+                :x2="yearSeparator.x"
+                y1="14"
+                :y2="7 * cellStep + 16"
+                :stroke="accentColor + '30'"
+                stroke-width="1"
+                stroke-dasharray="3 3"
+              />
+            </g>
 
             <!-- Day cells -->
             <g transform="translate(0, 16)">
@@ -299,7 +345,7 @@ function formatDate(dateStr) {
           </svg>
         </div>
 
-        <!-- Tooltip — always mounted, smoothly transitions position + opacity -->
+        <!-- Tooltip -->
         <div
           class="heatmap-tooltip absolute pointer-events-none z-50 px-3 py-1.5 rounded-md text-xs whitespace-nowrap"
           :class="{ active: tooltip.visible }"
@@ -318,9 +364,8 @@ function formatDate(dateStr) {
         </div>
       </div>
 
-      <!-- Scroll hint -->
+      <!-- Legend -->
       <div class="flex items-center justify-between mt-2">
-        <!-- Legend -->
         <div class="flex items-center gap-2 text-xs text-zinc-600">
           <span>Less</span>
           <div
@@ -338,7 +383,7 @@ function formatDate(dateStr) {
 </template>
 
 <style scoped>
-/* Smooth tooltip — always mounted, transitions position + opacity */
+/* Smooth tooltip */
 .heatmap-tooltip {
   opacity: 0;
   transition: opacity 0.15s ease, left 0.12s ease, top 0.1s ease;
