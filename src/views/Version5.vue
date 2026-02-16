@@ -71,24 +71,25 @@ function updateTimeline() {
     timelineBranches.value = []
     return
   }
-  const wrapRect = gridWrapRef.value.getBoundingClientRect()
-  const branches = []
 
+  // Batch all DOM reads in one pass to avoid forced reflows
+  const wrapTop = gridWrapRef.value.getBoundingClientRect().top
+  const rects = []
   for (let i = 0; i < projects.length; i++) {
     const el = projectEls.value[i]
-    if (!el) continue
-    const r = el.getBoundingClientRect()
-    // Skip cards that haven't appeared yet (still have 0 height or are off-screen)
-    if (r.height === 0) continue
-    const cardCenterY = r.top + r.height / 2 - wrapRect.top
-    const isLeft = i % 2 === 0
-    branches.push({ y: cardCenterY, isLeft })
+    rects.push(el ? el.getBoundingClientRect() : null)
   }
 
-  // Timeline stops at last project card center
-  if (branches.length > 0) {
-    timelineHeight.value = branches[branches.length - 1].y
+  // Now compute from cached values (no more DOM reads)
+  const branches = []
+  for (let i = 0; i < rects.length; i++) {
+    const r = rects[i]
+    if (!r || r.height === 0) continue
+    branches.push({ y: r.top + r.height / 2 - wrapTop, isLeft: i % 2 === 0 })
   }
+
+  // Single batch write
+  timelineHeight.value = branches.length > 0 ? branches[branches.length - 1].y : 0
   timelineBranches.value = branches
 }
 
@@ -107,6 +108,7 @@ const SPEED_SLOW = 0.1
 let marqueeOffset = 0
 let currentSpeed = SPEED_NORMAL
 let marqueeRaf = null
+let marqueeHalfWidth = 0 // cached to avoid reading scrollWidth every frame
 
 function tickMarquee() {
   if (!marqueeEl.value) return
@@ -116,8 +118,7 @@ function tickMarquee() {
 
   marqueeOffset += currentSpeed
   // Half-width = one full set of items; reset seamlessly
-  const halfWidth = marqueeEl.value.scrollWidth / 2
-  if (marqueeOffset >= halfWidth) marqueeOffset -= halfWidth
+  if (marqueeOffset >= marqueeHalfWidth) marqueeOffset -= marqueeHalfWidth
 
   marqueeEl.value.style.transform = `translateX(-${marqueeOffset}px)`
   marqueeRaf = requestAnimationFrame(tickMarquee)
@@ -131,7 +132,10 @@ let projectObserver = null
 onMounted(() => {
   setTimeout(() => { heroReady.value = true }, 100)
 
-  // Start marquee loop
+  // Start marquee loop — cache scrollWidth once to avoid per-frame reflow
+  nextTick(() => {
+    if (marqueeEl.value) marqueeHalfWidth = marqueeEl.value.scrollWidth / 2
+  })
   marqueeRaf = requestAnimationFrame(tickMarquee)
 
   // Set up divider replay observer

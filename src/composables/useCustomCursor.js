@@ -20,6 +20,7 @@ export function useCustomCursor(config, containerRef) {
   let ringY = 0
   let isTouchDevice = false
   let interactiveElements = []
+  let cursorStyleEl = null
 
   // Rose trail state
   let trailParticles = []
@@ -68,10 +69,11 @@ export function useCustomCursor(config, containerRef) {
   function onMouseDown() {
     if (!cursorRing || config.variant !== 'rose') return
     cursorRing.style.setProperty('--ring-pos', `translate(${dotX}px, ${dotY}px)`)
+    // Restart click animation via class toggle (no forced reflow)
     cursorRing.classList.remove('cursor-click')
-    // Force reflow to restart animation
-    void cursorRing.offsetWidth
-    cursorRing.classList.add('cursor-click')
+    requestAnimationFrame(() => {
+      cursorRing.classList.add('cursor-click')
+    })
   }
 
   function animate() {
@@ -126,21 +128,11 @@ export function useCustomCursor(config, containerRef) {
       return
     }
 
-    const container = containerRef?.value || document.body
-    container.style.cursor = 'none'
-
-    // Also hide cursor on all child elements
-    const style = document.createElement('style')
-    style.id = 'custom-cursor-style'
-    style.textContent = `
-      [ref="container"] *, [ref="container"] a, [ref="container"] button {
-        cursor: none !important;
-      }
-    `
-    // Use a more targeted approach
-    container.querySelectorAll('*').forEach((el) => {
-      el.style.cursor = 'none'
-    })
+    // Hide native cursor with a single <style> rule instead of per-element inline styles
+    cursorStyleEl = document.createElement('style')
+    cursorStyleEl.id = 'custom-cursor-hide'
+    cursorStyleEl.textContent = '*, *::before, *::after { cursor: none !important; }'
+    document.head.appendChild(cursorStyleEl)
 
     // Create cursor elements
     cursorDot = document.createElement('div')
@@ -177,12 +169,11 @@ export function useCustomCursor(config, containerRef) {
     trailParticles.forEach((p) => p.remove())
     trailParticles = []
 
-    // Restore cursors
-    const container = containerRef?.value || document.body
-    container.style.cursor = ''
-    container.querySelectorAll('*').forEach((el) => {
-      el.style.cursor = ''
-    })
+    // Remove cursor-hide style rule (restores native cursor)
+    if (cursorStyleEl) {
+      cursorStyleEl.remove()
+      cursorStyleEl = null
+    }
 
     // Unbind interactive elements
     interactiveElements.forEach((el) => {

@@ -6,7 +6,7 @@
   --color-accent-cyan: #22d3ee;
   --color-accent-sky: #38bdf8;
   --color-accent-gold: #eab308;
-  --font-serif: "Playfair Display", serif;
+  --font-serif: Georgia, "Times New Roman", serif;
   --color-accent-emerald: #34d399;
   --color-accent-rose: #fb7185;
 }
@@ -486,6 +486,7 @@ body {
   border-radius: 14px;
   padding: 1.5rem 1.25rem;
   backdrop-filter: blur(6px);
+  contain: layout style;
 }
 
 /* V5: Elevated project card in wide mode */
@@ -496,6 +497,7 @@ body {
   padding: 0 1.25rem;
   backdrop-filter: blur(4px);
   transition: border-color 0.3s ease, background 0.3s ease, opacity 0.7s ease, transform 0.7s ease;
+  contain: layout style;
 }
 .v5-project-card-elevated:hover {
   border-color: rgba(251, 113, 133, 0.1);
@@ -529,6 +531,7 @@ body {
   pointer-events: none;
   z-index: 9999;
   will-change: transform;
+  contain: layout style size;
 }
 
 /* V1 Neon: dot + pulsing ring */
