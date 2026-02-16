@@ -3,8 +3,8 @@
 const particles = Array.from({ length: 15 }, (_, i) => ({
   id: i,
   x: Math.random() * 100,
-  size: 1 + Math.random() * 1,
-  opacity: 0.06 + Math.random() * 0.1,
+  size: 1.5 + Math.random() * 1.5,
+  opacity: 0.15 + Math.random() * 0.2,
   duration: 18 + Math.random() * 22,
   delay: Math.random() * -40,
   drift: -30 + Math.random() * 60,
