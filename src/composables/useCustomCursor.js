@@ -89,8 +89,8 @@ export function useCustomCursor(config, containerRef) {
       cursorRing.style.transform = `translate(${ringX}px, ${ringY}px)`
     }
 
-    // Rose trail: velocity-aware spawning
-    if (config.variant === 'rose') {
+    // Rose trail: velocity-aware spawning (suppressed in game mode)
+    if (config.variant === 'rose' && !document.body.classList.contains('game-mode')) {
       const dx = mouseX - prevMouseX
       const dy = mouseY - prevMouseY
       const velocity = Math.sqrt(dx * dx + dy * dy)

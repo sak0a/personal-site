@@ -3,10 +3,13 @@ import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useScrollReveal } from '../composables/useScrollReveal'
 import { useMagnetic } from '../composables/useMagnetic'
 import { useCustomCursor } from '../composables/useCustomCursor'
+import { usePlatformRegistry } from '../composables/usePlatformRegistry'
+import { useBallGame } from '../composables/useBallGame'
 import ProjectCard from '../components/shared/ProjectCard.vue'
 import GitHubHeatmap from '../components/shared/GitHubHeatmap.vue'
 import FooterSection from '../components/shared/FooterSection.vue'
 import TextEffect from '../components/shared/TextEffect.vue'
+import GameBall from '../components/shared/GameBall.vue'
 import { projects } from '../data/projects'
 import { links } from '../data/links'
 import { stack } from '../data/stack'
@@ -22,6 +25,55 @@ const projectVisible = ref({})
 useScrollReveal(container)
 const { onMove: magneticMove, onLeave: magneticLeave } = useMagnetic(8)
 useCustomCursor({ variant: 'rose', color: accent })
+
+// Ball game
+const dotEl = ref(null)
+const dotHidden = ref(false)
+const heroSectionEl = ref(null)
+const projectsHeadingEl = ref(null)
+const projectsSectionEl = ref(null)
+const platformRegistry = usePlatformRegistry()
+const ballGame = useBallGame(platformRegistry)
+
+const guideFloorEl = ref(null)
+const guideMidEl = ref(null)
+
+// Touch detection — disable game on touch devices
+const isTouchDevice = typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0)
+
+function activateGame() {
+  if (isTouchDevice || !dotEl.value) return
+  const rect = dotEl.value.getBoundingClientRect()
+  const startX = rect.left + rect.width / 2 + window.scrollX
+  const startY = rect.top + rect.height / 2 + window.scrollY
+  dotHidden.value = true
+  ballGame.activate(startX, startY)
+}
+
+// Game mode toggle handler — register/unregister guide platforms, restore dot
+watch(() => ballGame.gameActive.value, async (active) => {
+  if (!active) {
+    dotHidden.value = false
+    expandedId.value = null
+    platformRegistry.unregister('guide-floor')
+    platformRegistry.unregister('guide-mid')
+  } else {
+    await nextTick()
+    if (guideFloorEl.value) platformRegistry.register('guide-floor', guideFloorEl.value, 'solid')
+    if (guideMidEl.value) platformRegistry.register('guide-mid', guideMidEl.value, 'solid')
+  }
+})
+
+// Ball touching a card → toggle that project (expand if closed, close if open)
+// Touching a different card auto-closes the previous one (same as normal click behavior)
+watch(() => ballGame.touchingCard.value, (cardId) => {
+  if (!ballGame.gameActive.value || !cardId) return
+  const idx = parseInt(cardId.replace('card-', ''), 10)
+  if (idx >= 0 && idx < projects.length) {
+    const projectId = projects[idx].id
+    expandedId.value = expandedId.value === projectId ? null : projectId
+  }
+})
 
 const heroChars = ['s', 'a', 'k', 'a']
 
@@ -187,10 +239,25 @@ onMounted(() => {
   }, 100)
 
   window.addEventListener('resize', scheduleTimelineUpdate)
+
+  // Register ball game platforms after DOM settles
+  setTimeout(() => {
+    if (projectsHeadingEl.value) {
+      platformRegistry.register('projects-heading', projectsHeadingEl.value, 'solid')
+    }
+    projectEls.value.forEach((el, i) => {
+      if (el) platformRegistry.register(`card-${i}`, el, 'card')
+    })
+    dividerEls.value.forEach((el, i) => {
+      if (el) platformRegistry.register(`divider-${i}`, el, 'solid')
+    })
+  }, 200)
 })
 
 // Re-observe dividers when switching back to compact mode
 watch(wideLayout, async (wide) => {
+  // Deactivate game on layout change — platform positions shift
+  if (ballGame.gameActive.value) ballGame.deactivate()
   await nextTick()
   dividerObserver?.disconnect()
   if (!wide) {
@@ -221,6 +288,8 @@ onUnmounted(() => {
   if (marqueeRaf) cancelAnimationFrame(marqueeRaf)
   if (timelineRaf) cancelAnimationFrame(timelineRaf)
   window.removeEventListener('resize', scheduleTimelineUpdate)
+  ballGame.deactivate()
+  platformRegistry.clear()
 })
 </script>
 
@@ -228,7 +297,7 @@ onUnmounted(() => {
   <div>
   <div ref="container" :class="containerClass">
     <!-- Hero with char-reveal + magnetic title -->
-    <section class="min-h-screen flex flex-col justify-center pb-16 pt-24" :class="wideLayout ? 'lg:pb-20' : ''">
+    <section ref="heroSectionEl" class="min-h-screen flex flex-col justify-center pb-16 pt-24" :class="wideLayout ? 'lg:pb-20' : ''">
       <div class="inline-block mb-6">
         <h1
           class="v5-hero-title font-black tracking-tighter leading-none inline-block relative"
@@ -245,7 +314,13 @@ onUnmounted(() => {
               v-for="(char, i) in heroChars"
               :key="i"
               :style="{ transitionDelay: `${i * 60}ms` }"
-            >{{ char }}</span><span class="text-accent-rose" :style="{ transitionDelay: `${heroChars.length * 60}ms` }">.</span>
+            >{{ char }}</span><span
+              ref="dotEl"
+              class="text-accent-rose game-dot"
+              :class="{ 'game-dot-hidden': dotHidden, 'game-dot-clickable': !isTouchDevice }"
+              :style="{ transitionDelay: `${heroChars.length * 60}ms` }"
+              @click.stop="activateGame"
+            >.</span>
           </span>
         </h1>
       </div>
@@ -270,7 +345,13 @@ onUnmounted(() => {
         <span class="transition-opacity duration-500" :class="subtitleDone ? 'opacity-40' : 'opacity-0'" style="transition-delay:0.45s;color:#fb7185">·</span>
         <TextEffect tag="span" text="native apps" per="char" preset="blur" :trigger="subtitleDone" :delay="0.3" :speed-reveal="2" :speed-segment="0.7" class="inline" />
       </div>
+
+      <!-- Invisible guide platforms for ball game -->
+      <div v-if="ballGame.gameActive.value" ref="guideFloorEl" class="game-guide-platform" style="width: 100%; height: 4px; margin-top: 40px;" />
     </section>
+
+    <!-- Mid guide between hero and projects -->
+    <div v-if="ballGame.gameActive.value" ref="guideMidEl" class="game-guide-platform" style="width: 80%; height: 4px; margin: 0 auto;" />
 
     <!-- Full-page dotted background wrapper (projects → activity) -->
     <div ref="gridWrapRef" :class="wideLayout ? 'v5-project-grid-wrap' : ''" class="relative">
@@ -291,8 +372,9 @@ onUnmounted(() => {
       />
 
     <!-- Projects -->
-    <section class="reveal-slow pb-2 relative z-[1]">
+    <section ref="projectsSectionEl" class="reveal-slow pb-2 relative z-[1]">
       <h2
+        ref="projectsHeadingEl"
         class="font-bold mb-10 v5-heading-line"
         :class="wideLayout ? 'text-2xl lg:text-3xl' : 'text-2xl'"
         :style="{ '--accent': accent }"
@@ -317,7 +399,8 @@ onUnmounted(() => {
           class="transition-all duration-700 ease-out"
           :class="[
             projectVisible[i] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6',
-            wideLayout ? 'v5-project-card-elevated' : ''
+            wideLayout ? 'v5-project-card-elevated' : '',
+            ballGame.highlightedCard.value === `card-${i}` ? 'game-card-highlight' : ''
           ]"
         >
           <ProjectCard
@@ -431,5 +514,12 @@ onUnmounted(() => {
         </template>
       </FooterSection>
     </div>
+
+    <!-- Ball game overlay -->
+    <GameBall
+      :active="ballGame.gameActive.value"
+      :get-position="ballGame.getPosition"
+      :get-velocity="ballGame.getVelocity"
+    />
   </div>
 </template>
