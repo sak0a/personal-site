@@ -229,10 +229,10 @@ onUnmounted(() => {
   <div class="relative overflow-x-hidden">
   <!-- Full-width dotted grid background -->
   <div class="v5-checker-bg-full" />
-  <div ref="container" :class="containerClass">
+  <main ref="container" :class="containerClass">
     <!-- Hero with char-reveal + magnetic title -->
     <section class="min-h-screen flex flex-col justify-center pb-16 pt-24" :class="wideLayout ? 'lg:pb-20' : ''">
-      <div class="inline-block mb-6">
+      <div class="mb-6">
         <h1
           class="v5-hero-title font-black tracking-tighter leading-none inline-block relative"
           :class="[
@@ -430,7 +430,7 @@ onUnmounted(() => {
     </div> <!-- end v5-project-grid-wrap -->
 
     <div class="h-24 lg:h-32" />
-  </div>
+  </main>
 
     <!-- Footer area -->
     <div :class="footerContainerClass">
