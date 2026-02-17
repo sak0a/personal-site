@@ -127,17 +127,51 @@ body {
   transform: translateY(0);
 }
 
-/* V5: Hero "I'm" label via ::before — scales with the title font size using em units */
-.v5-hero-title::before {
-  content: "I'm";
+/* Hero morph: saka ↔ laurin liquid blend */
+.hero-morph-container {
+  position: relative;
+  display: inline-block;
+  vertical-align: bottom;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.hero-morph-container.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.hero-morph-words {
+  display: inline-block;
+  position: relative;
+  white-space: nowrap;
+}
+.hero-morph-text {
+  display: inline-block;
+  will-change: opacity;
+}
+.hero-morph-text-alt {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+.hero-morph-dot {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s,
+              transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s;
+  display: inline-block;
+  vertical-align: bottom;
+}
+.hero-morph-dot.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* V5: Hero "I'm" label — real element, animated with morph */
+.v5-hero-im {
   position: absolute;
   left: 0.25em;
-  /* Measured via TextMetrics API:
-     - h1 ascender gap (box top → glyph ink top): 0.244 × h1-font-size
-     - "I'm" descent gap (ink bottom → box bottom): 0.04 × h1-font-size
-     Total from h1 top to where ::before box-bottom should sit: 0.284 × h1-font-size.
-     But em inside ::before is relative to its own font-size (0.16 × h1),
-     so we divide: 0.284 / 0.16 = 1.775em in the ::before's context. */
   font-size: 0.17em;
   line-height: 1;
   top: 1.7em;
@@ -146,9 +180,11 @@ body {
   letter-spacing: 0.03em;
   color: var(--accent);
   opacity: 0;
-  transition: opacity 0.5s ease 50ms;
+  z-index: 2;
+  transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.05s,
+              left 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.v5-hero-title.v5-hero-ready::before {
+.v5-hero-im.visible {
   opacity: 1;
 }
 

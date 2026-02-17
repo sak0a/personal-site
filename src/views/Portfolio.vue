@@ -24,6 +24,95 @@ useScrollReveal(container)
 const { onMove: magneticMove, onLeave: magneticLeave } = useMagnetic(8)
 const heroChars = ['s', 'a', 'k', 'a']
 
+// --- Hero name morph: "saka" ↔ "laurin" ---
+const morphWords = ['saka', 'laurin']
+const morphProgress = ref(0) // 0 = first word, 1 = second word
+let morphRaf = null
+let morphPhase = 'hold-first' // 'hold-first' | 'morph-to-second' | 'hold-second' | 'morph-to-first'
+let morphTimer = 0
+const MORPH_HOLD_MS = 2500
+const MORPH_DURATION_MS = 1200
+
+function tickMorph(timestamp) {
+  if (!morphTimer) morphTimer = timestamp
+  const elapsed = timestamp - morphTimer
+
+  switch (morphPhase) {
+    case 'hold-first':
+      morphProgress.value = 0
+      if (elapsed >= MORPH_HOLD_MS) {
+        morphPhase = 'morph-to-second'
+        morphTimer = timestamp
+      }
+      break
+    case 'morph-to-second': {
+      const t = Math.min(elapsed / MORPH_DURATION_MS, 1)
+      morphProgress.value = easeInOutCubic(t)
+      if (t >= 1) {
+        morphPhase = 'hold-second'
+        morphTimer = timestamp
+      }
+      break
+    }
+    case 'hold-second':
+      morphProgress.value = 1
+      if (elapsed >= MORPH_HOLD_MS) {
+        morphPhase = 'morph-to-first'
+        morphTimer = timestamp
+      }
+      break
+    case 'morph-to-first': {
+      const t = Math.min(elapsed / MORPH_DURATION_MS, 1)
+      morphProgress.value = 1 - easeInOutCubic(t)
+      if (t >= 1) {
+        morphPhase = 'hold-first'
+        morphTimer = timestamp
+      }
+      break
+    }
+  }
+
+  morphRaf = requestAnimationFrame(tickMorph)
+}
+
+function easeInOutCubic(t) {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
+}
+
+// Derived filter values for the SVG morph effect
+const morphBlur = computed(() => {
+  // Max blur at midpoint (progress = 0.5), zero at ends
+  const distFromCenter = Math.abs(morphProgress.value - 0.5) * 2 // 0 at center, 1 at edges
+  return Math.max(0, 1 - distFromCenter) * 8
+})
+
+const morphText1Opacity = computed(() => 1 - morphProgress.value)
+const morphText2Opacity = computed(() => morphProgress.value)
+
+// "I'm" label shifts right when "laurin" is showing to clear the 'l' ascender
+const imLeft = computed(() => {
+  const from = 0.25 // em — default position above "saka"
+  const to = 1.8    // em — shifted right to clear "l" in "laurin"
+  return (from + (to - from) * morphProgress.value) + 'em'
+})
+
+// Measure word widths for smooth container sizing
+const morphText1El = ref(null)
+const morphText2El = ref(null)
+const morphWidth1 = ref(0)
+const morphWidth2 = ref(0)
+
+function measureMorphWidths() {
+  if (morphText1El.value) morphWidth1.value = morphText1El.value.offsetWidth
+  if (morphText2El.value) morphWidth2.value = morphText2El.value.offsetWidth
+}
+
+const morphContainerWidth = computed(() => {
+  if (!morphWidth1.value || !morphWidth2.value) return 'auto'
+  const w = morphWidth1.value + (morphWidth2.value - morphWidth1.value) * morphProgress.value
+  return w + 'px'
+})
+
 function toggleProject(id) {
   expandedId.value = expandedId.value === id ? null : id
 }
@@ -131,6 +220,20 @@ let projectObserver = null
 onMounted(() => {
   setTimeout(() => { heroReady.value = true }, 100)
 
+  // Measure morph word widths after fonts loaded and DOM settled
+  nextTick(() => {
+    measureMorphWidths()
+    // Re-measure after fonts finish loading
+    document.fonts?.ready?.then(measureMorphWidths)
+  })
+  window.addEventListener('resize', measureMorphWidths)
+
+  // Start morph loop after initial char reveal settles
+  setTimeout(() => {
+    measureMorphWidths()
+    morphRaf = requestAnimationFrame(tickMorph)
+  }, 1800)
+
   // Start marquee loop — cache scrollWidth once to avoid per-frame reflow
   nextTick(() => {
     if (marqueeEl.value) marqueeHalfWidth = marqueeEl.value.scrollWidth / 2
@@ -234,7 +337,9 @@ onUnmounted(() => {
   projectObserver?.disconnect()
   if (marqueeRaf) cancelAnimationFrame(marqueeRaf)
   if (timelineRaf) cancelAnimationFrame(timelineRaf)
+  if (morphRaf) cancelAnimationFrame(morphRaf)
   window.removeEventListener('resize', scheduleTimelineUpdate)
+  window.removeEventListener('resize', measureMorphWidths)
   window.removeEventListener('scroll', onScrollHideArrow)
 })
 </script>
@@ -257,13 +362,48 @@ onUnmounted(() => {
           @mousemove="magneticMove"
           @mouseleave="magneticLeave"
         >
-          <span class="char-reveal" :class="{ visible: heroReady }">
+          <!-- "I'm" label — shifts right when "laurin" shows -->
+          <span
+            class="v5-hero-im"
+            :class="{ visible: heroReady }"
+            :style="{ left: imLeft }"
+          >I'm</span>
+          <!-- SVG morph filter (hidden, referenced by CSS) -->
+          <svg class="absolute w-0 h-0" aria-hidden="true">
+            <defs>
+              <filter id="hero-morph-filter">
+                <feGaussianBlur in="SourceGraphic" :stdDeviation="morphBlur" result="blur" />
+                <feColorMatrix
+                  in="blur"
+                  type="matrix"
+                  values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7"
+                  result="goo"
+                />
+                <feComposite in="SourceGraphic" in2="goo" operator="atop" />
+              </filter>
+            </defs>
+          </svg>
+          <span
+            class="hero-morph-container"
+            :class="{ visible: heroReady }"
+            :style="{ width: morphContainerWidth }"
+          >
             <span
-              v-for="(char, i) in heroChars"
-              :key="i"
-              :style="{ transitionDelay: `${i * 60}ms` }"
-            >{{ char }}</span><span class="text-accent-rose" :style="{ transitionDelay: `${heroChars.length * 60}ms` }">.</span>
-          </span>
+              class="hero-morph-words"
+              :style="{ filter: morphBlur > 0.1 ? 'url(#hero-morph-filter)' : 'none' }"
+            >
+              <span
+                ref="morphText1El"
+                class="hero-morph-text"
+                :style="{ opacity: morphText1Opacity }"
+              >{{ morphWords[0] }}</span>
+              <span
+                ref="morphText2El"
+                class="hero-morph-text hero-morph-text-alt"
+                :style="{ opacity: morphText2Opacity }"
+              >{{ morphWords[1] }}</span>
+            </span>
+          </span><span class="text-accent-rose hero-morph-dot" :class="{ visible: heroReady }">.</span>
         </h1>
       </div>
       <TextEffect
