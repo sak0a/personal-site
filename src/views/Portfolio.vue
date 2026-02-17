@@ -16,6 +16,7 @@ const container = ref(null)
 const expandedId = ref(null)
 const heroReady = ref(false)
 const subtitleDone = ref(false)
+const showScrollArrow = ref(false)
 const dividerEls = ref([])
 const projectEls = ref([])
 const projectVisible = ref({})
@@ -213,12 +214,28 @@ watch(projectVisible, () => {
   setTimeout(scheduleTimelineUpdate, 800)
 }, { deep: true })
 
+// Scroll-down arrow: show after subtitle animation, hide on first scroll
+function onScrollHideArrow() {
+  if (window.scrollY > 50) {
+    showScrollArrow.value = false
+    window.removeEventListener('scroll', onScrollHideArrow)
+  }
+}
+
+watch(subtitleDone, (done) => {
+  if (done) {
+    showScrollArrow.value = true
+    window.addEventListener('scroll', onScrollHideArrow, { passive: true })
+  }
+})
+
 onUnmounted(() => {
   dividerObserver?.disconnect()
   projectObserver?.disconnect()
   if (marqueeRaf) cancelAnimationFrame(marqueeRaf)
   if (timelineRaf) cancelAnimationFrame(timelineRaf)
   window.removeEventListener('resize', scheduleTimelineUpdate)
+  window.removeEventListener('scroll', onScrollHideArrow)
 })
 </script>
 
@@ -228,7 +245,7 @@ onUnmounted(() => {
   <div class="v5-checker-bg-full" />
   <main ref="container" :class="containerClass">
     <!-- Hero with char-reveal + magnetic title -->
-    <section class="min-h-screen flex flex-col justify-center pb-16 pt-24" :class="wideLayout ? 'lg:pb-20' : ''">
+    <section class="relative min-h-screen flex flex-col justify-center pb-16 pt-24" :class="wideLayout ? 'lg:pb-20' : ''">
       <div class="mb-6">
         <h1
           class="v5-hero-title font-black tracking-tighter leading-none inline-block relative"
@@ -269,6 +286,22 @@ onUnmounted(() => {
         <TextEffect tag="span" text="gaming" per="char" preset="blur" :trigger="subtitleDone" :delay="0.2" :speed-reveal="2" :speed-segment="0.7" class="inline" />
         <span class="transition-opacity duration-500" :class="subtitleDone ? 'opacity-40' : 'opacity-0'" style="transition-delay:0.45s;color:#fb7185">·</span>
         <TextEffect tag="span" text="native apps" per="char" preset="blur" :trigger="subtitleDone" :delay="0.3" :speed-reveal="2" :speed-segment="0.7" class="inline" />
+      </div>
+
+      <!-- Scroll-down arrow -->
+      <div
+        class="absolute bottom-8 left-1/2 -translate-x-1/2 transition-opacity duration-500"
+        :class="showScrollArrow ? 'opacity-100' : 'opacity-0 pointer-events-none'"
+      >
+        <svg
+          class="w-5 h-5 text-zinc-600 animate-bounce"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" />
+        </svg>
       </div>
     </section>
 
