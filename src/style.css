@@ -995,3 +995,26 @@ body {
   opacity: 1;
   animation: cursor-ink-bleed 0.5s ease-out forwards;
 }
+
+/* ===== BLOG STYLES ===== */
+
+/* Inline code in blog content */
+.blog-prose code:not(pre code) {
+  background: rgba(255, 255, 255, 0.06);
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+  font-size: 0.875em;
+  font-family: var(--font-mono);
+  color: #fb7185;
+}
+
+/* Blog prose links */
+.blog-prose a {
+  color: #fb7185;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: opacity 0.2s ease;
+}
+.blog-prose a:hover {
+  opacity: 0.8;
+}

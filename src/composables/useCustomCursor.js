@@ -156,6 +156,17 @@ export function useCustomCursor(config, containerRef) {
     setTimeout(bindInteractiveElements, 500)
   })
 
+  function rebindInteractiveElements() {
+    // Unbind previous
+    interactiveElements.forEach((el) => {
+      el.removeEventListener('mouseenter', onMouseEnterInteractive)
+      el.removeEventListener('mouseleave', onMouseLeaveInteractive)
+    })
+    interactiveElements = []
+    // Rebind after DOM settles
+    setTimeout(bindInteractiveElements, 300)
+  }
+
   onUnmounted(() => {
     if (isTouchDevice) return
 
@@ -182,4 +193,6 @@ export function useCustomCursor(config, containerRef) {
     })
     interactiveElements = []
   })
+
+  return { rebindInteractiveElements }
 }

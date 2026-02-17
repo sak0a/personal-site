@@ -11,8 +11,9 @@ export const links = [
   },
   {
     name: 'Blog',
-    url: '#',
+    url: '/blog',
     icon: 'blog',
+    internal: true,
   },
   {
     name: 'Twitter / X',

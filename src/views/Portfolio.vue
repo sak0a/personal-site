@@ -2,7 +2,6 @@
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useScrollReveal } from '../composables/useScrollReveal'
 import { useMagnetic } from '../composables/useMagnetic'
-import { useCustomCursor } from '../composables/useCustomCursor'
 import ProjectCard from '../components/shared/ProjectCard.vue'
 import GitHubHeatmap from '../components/shared/GitHubHeatmap.vue'
 import FooterSection from '../components/shared/FooterSection.vue'
@@ -22,8 +21,6 @@ const projectEls = ref([])
 const projectVisible = ref({})
 useScrollReveal(container)
 const { onMove: magneticMove, onLeave: magneticLeave } = useMagnetic(8)
-useCustomCursor({ variant: 'rose', color: accent })
-
 const heroChars = ['s', 'a', 'k', 'a']
 
 function toggleProject(id) {
@@ -438,7 +435,16 @@ onUnmounted(() => {
         <template #links>
           <div class="flex flex-wrap items-center gap-x-1 gap-y-2 mb-8">
             <template v-for="(link, i) in links" :key="link.name">
+              <router-link
+                v-if="link.internal"
+                :to="link.url"
+                class="v5-link"
+              >
+                <span class="v5-link-text text-zinc-500">{{ link.name }}</span>
+                <span class="v5-link-line" />
+              </router-link>
               <a
+                v-else
                 :href="link.url"
                 target="_blank"
                 rel="noopener noreferrer"
