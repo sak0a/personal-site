@@ -218,7 +218,7 @@ let dividerObserver = null
 let projectObserver = null
 
 onMounted(() => {
-  setTimeout(() => { heroReady.value = true }, 100)
+  setTimeout(() => { heroReady.value = true }, 400)
 
   // Measure morph word widths after fonts loaded and DOM settled
   nextTick(() => {
