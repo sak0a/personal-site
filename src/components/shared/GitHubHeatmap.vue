@@ -20,6 +20,7 @@ const heatmapRoot = ref(null)
 const heatmapWrapper = ref(null)
 const scrollContainer = ref(null)
 let observer = null
+let visibilityObserver = null
 
 // Tooltip state
 const tooltip = ref({ visible: false, x: 0, y: 0, count: 0, date: '' })
@@ -152,7 +153,7 @@ const dateRange = computed(() => {
   return `${fmt(first)} – ${fmt(last)}`
 })
 
-onMounted(async () => {
+async function fetchContributions() {
   try {
     const now = new Date()
     const currentYear = now.getFullYear()
@@ -208,6 +209,23 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
+}
+
+onMounted(() => {
+  if (!heatmapRoot.value) return
+
+  // Defer API fetch until the component is near the viewport
+  visibilityObserver = new IntersectionObserver(
+    (entries) => {
+      if (entries[0].isIntersecting) {
+        visibilityObserver.disconnect()
+        visibilityObserver = null
+        fetchContributions()
+      }
+    },
+    { rootMargin: '200px' },
+  )
+  visibilityObserver.observe(heatmapRoot.value)
 })
 
 function measureContainer() {
@@ -233,6 +251,10 @@ function setupScrollTrigger() {
 }
 
 onUnmounted(() => {
+  if (visibilityObserver) {
+    visibilityObserver.disconnect()
+    visibilityObserver = null
+  }
   if (observer) {
     observer.disconnect()
     observer = null

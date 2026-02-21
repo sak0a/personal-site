@@ -1,9 +1,9 @@
 <script setup>
-import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted, nextTick, defineAsyncComponent } from 'vue'
 import { useScrollReveal } from '../composables/useScrollReveal'
 import { useMagnetic } from '../composables/useMagnetic'
 import ProjectCard from '../components/shared/ProjectCard.vue'
-import GitHubHeatmap from '../components/shared/GitHubHeatmap.vue'
+const GitHubHeatmap = defineAsyncComponent(() => import('../components/shared/GitHubHeatmap.vue'))
 import FooterSection from '../components/shared/FooterSection.vue'
 import TextEffect from '../components/shared/TextEffect.vue'
 import ContactForm from '../components/shared/ContactForm.vue'
