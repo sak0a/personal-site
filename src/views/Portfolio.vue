@@ -25,6 +25,7 @@ const { onMove: magneticMove, onLeave: magneticLeave } = useMagnetic(8)
 const heroChars = ['s', 'a', 'k', 'a']
 
 // --- Hero name morph: "saka" ↔ "laurin" ---
+const morphActive = ref(false) // deferred to avoid "laurin" being picked as LCP
 const morphWords = ['saka', 'laurin']
 const morphProgress = ref(0) // 0 = first word, 1 = second word
 let morphRaf = null
@@ -230,8 +231,11 @@ onMounted(() => {
 
   // Start morph loop after initial char reveal settles
   setTimeout(() => {
-    measureMorphWidths()
-    morphRaf = requestAnimationFrame(tickMorph)
+    morphActive.value = true
+    nextTick(() => {
+      measureMorphWidths()
+      morphRaf = requestAnimationFrame(tickMorph)
+    })
   }, 1800)
 
   // Start marquee loop — cache scrollWidth once to avoid per-frame reflow
@@ -398,6 +402,7 @@ onUnmounted(() => {
                 :style="{ opacity: morphText1Opacity }"
               >{{ morphWords[0] }}</span>
               <span
+                v-if="morphActive"
                 ref="morphText2El"
                 class="hero-morph-text hero-morph-text-alt"
                 :style="{ opacity: morphText2Opacity }"
